@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	'lex',
+	'parse',
+	'rly_common',
+]
