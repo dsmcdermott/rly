@@ -23,6 +23,8 @@ they are also designed to be usable independently of each other, with parsers on
 assuming that a given lexer implements certain interfaces, and lexers being usable without
 any parser at all.
 
+For more information, the online documentation for the package can be read [here].
+
 ## Parsers
 
 The parsers built by this package (specifically, the crate `parse`) are normal [LR
@@ -95,6 +97,9 @@ build them as necessary.
 
 ## Building the Documentation
 
+The documentation for the package can be read online [here], but it can also be built
+locally.
+
 To build the documentation for this project, run `cargo doc` inside the top-level
 directory for the workspace. The html documentation for `lex`, `parse`, and `rly_common`
 can then be found as directories in `targed/doc`.
@@ -102,6 +107,7 @@ can then be found as directories in `targed/doc`.
 
 
 [`include`]: https://doc.rust-lang.org/std/macro.include.html
+[here]: https://dsmcdermott.github.io/rly-docs/
 [LR parsers]: https://en.wikipedia.org/wiki/LR_parser
 ["recursive ascent"]: https://en.wikipedia.org/wiki/Recursive_ascent_parser
 [cannonical LR(1) parser]: https://en.wikipedia.org/wiki/Canonical_LR_parser
