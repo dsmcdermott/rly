@@ -23,6 +23,9 @@ they are also designed to be usable independently of each other, with parsers on
 assuming that a given lexer implements certain interfaces, and lexers being usable without
 any parser at all.
 
+Note that this project is still very much a work-in-progress. See `TODO.md` for more
+information about what needs to be done.
+
 For more information, the online documentation for the package can be read [here].
 
 ## Parsers
