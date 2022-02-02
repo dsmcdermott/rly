@@ -501,8 +501,6 @@ need to include them in our project. To do so, we use the `lex::lexer!` and
 
 use std::io;
 
-use parse::ast::Ast;
-
 // include the lexer
 lex::lexer!();
 
@@ -604,23 +602,23 @@ fn parse_input<'r, 's>(tokens: Tokens<'r, 's>, mut calculator: &mut Calculator) 
 
 // Our Walker for actually calculating the value of an Ast.
 //
-// stack is a list of the parsed values of the child nodes of each of the ancestral branch
-// nodes, as well as those of the current branch node which is the Vec on top of the
+// stack is a list of the parsed values of the child nodes of each of the ancestral branch 
+// nodes, as well as those of the current branch node which is the Vec on top of the 
 // stack.
 //
-// When an 'int' leaf node is encountered, it's parsed as a u32 and pushed on to the
-// vector on the top of the stack. When a branch node is encountered, a new empty Vec is
+// When an 'int' leaf node is encountered, it's parsed as a u32 and pushed on to the 
+// vector on the top of the stack. When a branch node is encountered, a new empty Vec is 
 // made and pushed onto the stack.
 //
-// When a branch node is left, the top of the stack (the Vec corresponding to the child
-// nodes of that branch) is poped, and the Vec is then either summed, multiplied, or has
-// its single value poped, depending on if the branch node is a 'Sum', 'Fact', or 'Term'
-// respectively. The result is then pushed onto the end of the new Vec on top of the
+// When a branch node is left, the top of the stack (the Vec corresponding to the child 
+// nodes of that branch) is poped, and the Vec is then either summed, multiplied, or has 
+// its single value poped, depending on if the branch node is a 'Sum', 'Fact', or 'Term' 
+// respectively. The result is then pushed onto the end of the new Vec on top of the 
 // stack.
 //
-// After the tree has been walked, the stack consists of a single Vec representing the
-// child nodes of the top-level 'start' node, which should itself consist of a single
-// element representing the single child 'Sum' node. final_result can then be run to
+// After the tree has been walked, the stack consists of a single Vec representing the 
+// child nodes of the top-level 'start' node, which should itself consist of a single 
+// element representing the single child 'Sum' node. final_result can then be run to 
 // extract that value and return the calculator to a fresh state.
 struct Calculator {
 	stack: Vec<Vec<u32>>,
@@ -651,9 +649,9 @@ impl Calculator {
 	}
 }
 
-impl<'a, 's> Walker<'a, parser::Ast<'s>, ()> for Calculator {
+impl<'a, 's> Walker<'a, NonTerm, Token<'s>, ()> for Calculator {
 	// pushes a new Vec onto self.stack for the child nodes of '_tree'
-	fn on_branch(&mut self, _tree: &'a parser::Ast<'s>) -> (Option<()>, bool) {
+	fn on_branch(&mut self, _tree: &'a Ast<NonTerm, Token<'s>>) -> (Option<()>, bool) {
 		self.stack.push(Vec::new());
 		(None, true)
 	}
@@ -668,9 +666,9 @@ impl<'a, 's> Walker<'a, parser::Ast<'s>, ()> for Calculator {
 		None
 	}
 
-	// pops the top off off self.stack, combines the values as appropriate, and then
+	// pops the top off off self.stack, combines the values as appropriate, and then 
 	// pushes the result
-	fn exit(&mut self, tree: &'a parser::Ast<'s>) -> Option<()> {
+	fn exit(&mut self, tree: &'a Ast<NonTerm, Token<'s>>) -> Option<()> {
 		let mut operands = self.pop();
 		let n = match tree.label() {
 			NonTerm::N_Sum => operands.into_iter().sum(),
