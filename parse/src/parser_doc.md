@@ -412,12 +412,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lex = "0.1.0"
-parse = "0.1.0"
+lex = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
+parse = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
 
 [build-dependencies]
-lex = "0.1.0"
-parse = "0.1.0"
+lex = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
+parse = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
 ```
 
 Now we'll specify the lexer by adding our lexer file `calculator_lex.lex` and creating

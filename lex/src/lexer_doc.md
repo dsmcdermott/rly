@@ -471,10 +471,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lex = "0.1.0"
+lex = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
 
 [build-dependencies]
-lex = "0.1.0"
+lex = { version = "0.1.0", git = "https://github.com/dsmcdermott/rly" }
 ```
 
 ([`lex`](self) needs to be added as a build dependency so that we can use it in
