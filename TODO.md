@@ -94,6 +94,10 @@ templates.
 
 # Stretch Goals
 
+## Parser Capability
+
+- [ ] Add the ability to use empty production rules when generating parsers.
+
 ## Specifications
 
 - [ ] Add the ability to link lexer and parser specifications for verification and
