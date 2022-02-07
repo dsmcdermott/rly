@@ -4,7 +4,7 @@ use std::fs::File;
 
 //const TEST_DOC: &'static str = r#"
 //
-//start -> Expr;
+//Start -> Expr;
 //Expr -> Fact ;
 //
 //Expr -> lparen Expr rparen
@@ -19,7 +19,7 @@ use std::fs::File;
 //;"#;
 
 const ALT_TEST_DOC: &'static str = r"
-start -> Sum;
+Start -> Sum;
 Sum -> Sum plus Fact;
 Sum -> Fact;
 Fact -> Fact mult Term;
@@ -66,9 +66,9 @@ ignore : "[[:space:]]"
 
 #[test]
 fn write_parser() {
-	let fout = File::create("tests/test_parser").unwrap();
 	let rules = alt_rules();
 	let spec = spec(&rules);
+	let fout = File::create("tests/test_parser").unwrap();
 	spec.write(fout).unwrap();
 }
 

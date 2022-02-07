@@ -321,7 +321,7 @@ pub struct TableBuilder<'a, N: Prim, T: Prim> {
 
 impl<'a, N: Prim, T: Prim> TableBuilder<'a, N, T> {
 	// Creates and initializes a new TableBuilder for 'rules', generating a single initial
-	// table for the rule for "start".
+	// table for the rule for "Start".
 	pub(crate) fn new(rules: &'a GrammarRules<N, T>) -> Self {
 		let mut builder = Self {
 			rules,
@@ -460,7 +460,7 @@ impl<'a, N: Prim, T: Prim> TableBuilder<'a, N, T> {
 	// Builds a set of tables by repeatedly calling self.process_table.
 	//
 	// TableBuilder's are created by TableBuilder::new() with a single table in the
-	// 'tables' queue, representing the table for the "start" rule. Calling this method
+	// 'tables' queue, representing the table for the "Start" rule. Calling this method
 	// will then populate self.finished_tables with the complete set of LR(1) tables,
 	// leaving self.tables empty.
 	//

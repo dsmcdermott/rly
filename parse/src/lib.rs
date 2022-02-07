@@ -170,10 +170,10 @@
 //! Which matches at least one ASCII alphabetical character, followed by any combination
 //! of digits `0` through `9`, underscores `_`, or ASCII alphabetical characters.
 //!
-//! ### "start" and "eof"
+//! ### "Start" and "eof"
 //!
-//! The symbols `start` and `eof` are special: `eof` is reserved and cannot be used as a
-//! symbol, and the symbol `start` must occur exactly once, on the left-hand side of a
+//! The symbols `Start` and `eof` are special: `eof` is reserved and cannot be used as a
+//! symbol, and the symbol `Start` must occur exactly once, on the left-hand side of a
 //! production rule.
 //!
 //! ## Semantics
@@ -187,7 +187,7 @@
 //!
 //! Given an input sequence of terminal symbols (paired with their original values,) the
 //! parser attempts to generate a _derivation history_ for the sequence which describes
-//! how to generate that sequence by starting with the [`start`](crate#start-and-eof)
+//! how to generate that sequence by starting with the [`Start`](crate#start-and-eof)
 //! symbol, and recurively applying production rules untill the appropriate sequence of
 //! non-terminals is produced.
 //!
@@ -201,14 +201,14 @@
 //! Suppose you have the following grammar:
 //!
 //! ```text
-//! start -> Sum;
+//! Start -> Sum;
 //! Sum -> Fact;
 //! Sum -> Sum plus Fact;
 //! Fact -> int;
 //! Fact -> Fact mult int;
 //! ```
 //!
-//! With non-terminals `start`, `Sum`, and `Fact`, and terminals `plus` `mult` and `int`.
+//! With non-terminals `Start`, `Sum`, and `Fact`, and terminals `plus` `mult` and `int`.
 //!
 //! And suppose you have the following input:
 //!
@@ -239,14 +239,14 @@
 //! Sum(Sum(Fact(int)) plus Fact(Fact(int) mult int)) plus int
 //! Sum(Sum(Fact(int)) plus Fact(Fact(int) mult int)) plus Fact(int)
 //! Sum(Sum(Sum(Fact(int)) plus Fact(Fact(int) mult int)) plus Fact(int))
-//! start(Sum(Sum(Sum(Fact(int)) plus Fact(Fact(int) mult int)) plus Fact(int)))
+//! Start(Sum(Sum(Sum(Fact(int)) plus Fact(Fact(int) mult int)) plus Fact(int)))
 //! ```
 //!
 //! This results in a tree which groups nodes according to the grammar rules given above.
 //! For illustration:
 //!
 //! ```text
-//!                        start
+//!                        Start
 //!                          │
 //!                         Sum
 //!          ┌───────────────┴───────────────┬───────┐
@@ -463,7 +463,7 @@
 //! "`calculator_parse.y`":
 //!
 //! ```text
-//! start -> Sum;
+//! Start -> Sum;
 //! Sum -> Fact;
 //! Sum -> Sum plus Fact;
 //! Fact -> Term;
@@ -623,7 +623,7 @@
 //! // stack.
 //! //
 //! // After the tree has been walked, the stack consists of a single Vec representing the
-//! // child nodes of the top-level 'start' node, which should itself consist of a single
+//! // child nodes of the top-level 'Start' node, which should itself consist of a single
 //! // element representing the single child 'Sum' node. final_result can then be run to
 //! // extract that value and return the calculator to a fresh state.
 //! struct Calculator {
@@ -683,7 +683,7 @@
 //! 				assert_eq!(operands.len(), 1);
 //! 				operands.pop().unwrap()
 //! 			}
-//! 			NonTerm::N_start => unreachable!(),
+//! 			NonTerm::N_Start => unreachable!(),
 //! 		};
 //! 		self.push(n);
 //! 		None
@@ -718,11 +718,9 @@ pub use grammar_rule_structures::Prim;
 
 mod grammar_rules;
 
-//pub use grammar_rules::GrammarRules;
+const START: &'static str = "Start";
 
 mod table_construction;
-
-//pub use table_construction::{TableBuilder, Table};
 
 mod scanning;
 

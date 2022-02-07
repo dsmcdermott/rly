@@ -23,6 +23,7 @@ use std::{
 };
 
 use crate::{
+	START,
 	grammar_rule_structures::{Prim, Symbol},
 	scanning::RuleMap,
 };
@@ -240,7 +241,7 @@ pub struct SymMap<'a> {
 impl<'a> SymMap<'a> {
 	pub fn new(map: &RuleMap<'a>) -> Self {
 		let mut non_terms: Vec<_> = map.keys().copied().collect();
-		debug_assert!(non_terms.contains(&"start"));
+		debug_assert!(non_terms.contains(&START));
 		non_terms.sort_unstable();
 		let is_term = |s: &&str| !non_terms.binary_search(s).is_ok();
 		let mut terms: BTreeSet<_> = map
@@ -483,7 +484,7 @@ mod tests {
 
 	const TEST_DOC: &'static str = r#"
 
-start -> Expr;
+Start -> Expr;
 Expr -> Fact ; 
 
 Fact -> lparen Expr rparen

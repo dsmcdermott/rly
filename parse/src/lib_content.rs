@@ -4,11 +4,9 @@ pub use grammar_rule_structures::Prim;
 
 mod grammar_rules;
 
-//pub use grammar_rules::GrammarRules;
+const START: &'static str = "Start";
 
 mod table_construction;
-
-//pub use table_construction::{TableBuilder, Table};
 
 mod scanning;
 

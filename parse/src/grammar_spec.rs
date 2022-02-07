@@ -10,6 +10,7 @@
 // implement Display by writing out their data as the correctly formatted components.
 
 use crate::{
+	START,
 	error::ParserError,
 	grammar_rule_structures::Prim,
 	grammar_rules::GrammarRules,
@@ -37,7 +38,7 @@ use std::{
 /// use parse::Rules;
 ///
 /// let src = r"
-/// 	start -> Expr;
+/// 	Start -> Expr;
 /// 	Expr -> Fact;
 /// 	Fact -> lparen Expr rparen;
 /// 	Fact -> n;
@@ -57,7 +58,7 @@ use std::{
 ///
 /// let mut map: HashMap<&str, Vec<Box<[&str]>>> = HashMap::new();
 ///
-/// map.insert("start", vec![["Expr"].into()]);
+/// map.insert("Start", vec![["Expr"].into()]);
 /// map.insert("Expr", vec![["Fact"].into()]);
 /// map.insert("Fact", vec![
 /// 	["lparen", "Expr", "rparen"].into(),
@@ -82,7 +83,7 @@ use std::{
 /// use parse::Rules;
 ///
 /// let src = r"
-/// 	start -> Expr;
+/// 	Start -> Expr;
 /// 	Expr -> Fact;
 /// 	Fact -> lparen Expr rparen;
 /// 	Fact -> n;
@@ -129,7 +130,7 @@ where
 		map: SymMap<'a>,
 		rules: &HashMap<&'a str, Vec<Box<[&'a str]>>>,
 	) -> Result<Self, InvalidDiscriminant> {
-		let start = map.non_term_val("start").unwrap();
+		let start = map.non_term_val(START).unwrap();
 		let eof = map.term_val("eof").unwrap();
 		let rules = GrammarRules::new(map.grammar_rules(rules)?, start, eof);
 		Ok(Self { map, rules })
@@ -152,7 +153,7 @@ where
 	///
 	/// let mut map: HashMap<&str, Vec<Box<[&str]>>> = HashMap::new();
 	///
-	/// map.insert("start", vec![["Expr"].into()]);
+	/// map.insert("Start", vec![["Expr"].into()]);
 	/// map.insert("Expr", vec![["Fact"].into()]);
 	/// map.insert("Fact", vec![
 	/// 	["lparen", "Expr", "rparen"].into(),
@@ -183,7 +184,7 @@ where
 	/// use parse::Rules;
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -214,7 +215,7 @@ where
 	/// use parse::Rules;
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -251,7 +252,7 @@ impl<'a, N: Prim, T: Prim> Rules<'a, N, T> {
 	/// use parse::{Rules, ParserSpec};
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -281,7 +282,7 @@ impl<'a, N: Prim, T: Prim> Rules<'a, N, T> {
 /// use parse::{Rules, ParserSpec};
 ///
 /// let src = r"
-/// 	start -> Expr;
+/// 	Start -> Expr;
 /// 	Expr -> Fact;
 /// 	Fact -> lparen Expr rparen;
 /// 	Fact -> n;
@@ -315,7 +316,7 @@ impl<'a, 'b, N: Prim, T: Prim> ParserSpec<'a, 'b, N, T> {
 	/// use parse::{Rules, ParserSpec};
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -349,7 +350,7 @@ impl<'a, 'b, N: Prim, T: Prim> ParserSpec<'a, 'b, N, T> {
 	/// use parse::{Rules, ParserSpec};
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -383,7 +384,7 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 	/// use parse::{Rules, ParserSpec};
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -419,7 +420,7 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 	/// use parse::{Rules, ParserSpec};
 	///
 	/// let src = r"
-	/// 	start -> Expr;
+	/// 	Start -> Expr;
 	/// 	Expr -> Fact;
 	/// 	Fact -> lparen Expr rparen;
 	/// 	Fact -> n;
@@ -469,7 +470,7 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 ///
 /// ```
 /// let src = r"
-/// 	start -> Expr;
+/// 	Start -> Expr;
 /// 	Expr -> Fact;
 /// 	Fact -> lparen Expr rparen;
 /// 	Fact -> n;
@@ -645,7 +646,7 @@ where
 				"",
 				"Result<Ast<'a>>",
 				"",
-				"\n\t\t\t\t\t\tNonTerm::N_start => return Ok(s),",
+				"\n\t\t\t\t\t\tSTART => return Ok(s),",
 				"panic!(\"Unexpected error in parsing\")",
 			)
 		} else {
@@ -745,7 +746,7 @@ mod tests {
 
 	const TEST_DOC: &'static str = r#"
 
-start -> Expr;
+Start -> Expr;
 Expr -> Fact ; 
 
 Fact -> lparen Expr rparen

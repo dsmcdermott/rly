@@ -8,8 +8,11 @@
 // RULE ::= IDENT '->' IDENT+ ';'
 // Whitespace (including newlines) is ignored.
 //
-// 'start' and 'eof' are special identifiers. There must be exactly one rule with 'start' as the left-hand-side and 'start' cannot
-// appear on the right-hand-side of any rules. 'eof' is reserved and cannot be used.
+// START and "eof" are special identifiers. There must be exactly one rule with START as
+// the left-hand-side and START cannot appear on the right-hand-side of any rules. "eof"
+// is reserved and cannot be used.
+use crate::START;
+
 use std::{boxed::Box, collections::HashMap};
 
 use regex::{Match, Regex};
@@ -43,6 +46,7 @@ pub struct Scanner<'a> {
 }
 
 mod error {
+	use crate::START;
 	use rly_common::errors::ErrorData;
 
 	use std::{
@@ -56,7 +60,7 @@ mod error {
 	/// contains an [`ErrorData`] that describes the location of the error.
 	///
 	/// [^no_loc]: which is all of them except [`NoStart`](Self::NoStart), for sources that
-	/// lack a "`start`" rule, and [`EmptyInput`](Self::EmptyInput), for sources that are
+	/// lack a "`Start`" rule, and [`EmptyInput`](Self::EmptyInput), for sources that are
 	/// empty.
 	///
 	/// # Example
@@ -89,9 +93,9 @@ mod error {
 		MissingDiv(ErrorData),
 		/// A missing rule terminator "`;`".
 		MissingTerm(ErrorData),
-		/// No rule for "`start`".
+		/// No rule for "`Start`".
 		NoStart,
-		/// Multiple rules for "`start`".
+		/// Multiple rules for "`Start`".
 		DuplicateStart(ErrorData),
 		/// Reserved identifier "`eof`" used.
 		EofUsed(ErrorData),
@@ -119,7 +123,7 @@ mod error {
 					false
 				}
 			};
-			let _start = rules.get("start")?;
+			check!(rules.get(START)?.len() == 1);
 			for key in rules.keys() {
 				check!(check_ident(key));
 				let rhss = rules.get(key).unwrap();
@@ -128,6 +132,7 @@ mod error {
 					check!(rhs.len() != 0);
 					for name in rhs.iter() {
 						check!(check_ident(name));
+						check!(*name != START);
 					}
 				}
 			}
@@ -138,7 +143,7 @@ mod error {
 	impl Display for SrcError {
 		fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 			use SrcError::*;
-			let write = |f: &mut Formatter<'_>, mssg: &str, data: &ErrorData| {
+			fn write<T: Display>(f: &mut Formatter<'_>, mssg: T, data: &ErrorData) -> Result {
 				write!(
 					f,
 					"Syntax error on line {}: {}\n{}",
@@ -146,15 +151,17 @@ mod error {
 					mssg,
 					data.line_offset()
 				)
-			};
-			let wnd = |mssg: &str, f: &mut Formatter<'_>| write!(f, "Syntax error: {}", mssg);
+			}
+			fn wnd<T: Display>(mssg: T, f: &mut Formatter<'_>) -> Result {
+				write!(f, "Syntax error: {}", mssg)
+			}
 			match self {
 				InvalidIdent(data) => write(f, "Not a valid identifier.", data),
 				MissingDiv(data) => write(f, "Missing '->'", data),
 				MissingTerm(data) => write(f, "Missing closing ';'", data),
-				DuplicateStart(data) => write(f, "Only one rule for 'start' allowed", data),
+				DuplicateStart(data) => write(f, format_args!("Only one rule for '{}' allowed", START), data),
 				EofUsed(data) => write(f, "'eof' is a reserved value", data),
-				NoStart => wnd("Must have a rule for 'start'", f),
+				NoStart => wnd(format_args!("Must have a rule for '{}'", START), f),
 				EmptyInput => wnd("Input is empty", f),
 			}
 		}
@@ -231,7 +238,7 @@ impl<'a> Scanner<'a> {
 	fn expect_lhs(&mut self) -> Result<&'a str> {
 		let rmatch = self.find_name()?;
 		let name = rmatch.as_str();
-		if name == "start" && self.rules.contains_key(&name) {
+		if name == START && self.rules.contains_key(&name) {
 			return Err(self.err(SrcError::DuplicateStart));
 		};
 		self.update(rmatch);
@@ -288,7 +295,7 @@ impl<'a> Scanner<'a> {
 	}
 
 	fn check_has_start(&self) -> Result<()> {
-		if !self.rules.contains_key("start") {
+		if !self.rules.contains_key(START) {
 			Err(SrcError::NoStart)
 		} else {
 			Ok(())
@@ -346,7 +353,7 @@ mod tests {
 
 	const TEST_DOC: &'static str = r#"
 
-start -> Expr;
+Start -> Expr;
 Expr -> Fact ; 
 
 Fact -> lparen Expr rparen
@@ -375,7 +382,7 @@ Fact ->
 
 	const TEST_DOC_ERR: &'static str = r#"
 
-start -> Expr;
+Start -> Expr;
 Expr -> Fact ; 
 
 lparen Expr rparen
