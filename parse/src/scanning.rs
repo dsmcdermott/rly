@@ -27,10 +27,10 @@ use rly_common::errors::ErrorData;
 // might be more confusing at a glance
 pub type RuleMap<'a> = HashMap<&'a str, Vec<Box<[&'a str]>>>;
 
-const NAME: &'static str = r"^(\p{XID_Start}\p{XID_Continue}*)|(_\p{XID_Continue}*)";
+const NAME: &'static str = r"^[[:alpha:]]([0-9_[:alpha:]])*";
 const DIV: &'static str = "^->";
 const TERM: &'static str = "^;";
-const IGNORE: &'static str = r"^\p{Pattern_White_Space}+";
+const IGNORE: &'static str = r"^[[:space:]]+";
 const RESERVED: &'static str = "^(crate)|(self)|(super)|(Self)$";
 
 // Scans its input 'inp' to generate a RuleMap. name, div, term, and ignore are all
