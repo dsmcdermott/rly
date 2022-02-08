@@ -6,6 +6,8 @@ mod grammar_rules;
 
 const START: &'static str = "Start";
 
+const EOF: &'static str = "$";
+
 mod table_construction;
 
 mod scanning;

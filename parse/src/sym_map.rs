@@ -23,6 +23,7 @@ use std::{
 };
 
 use crate::{
+	EOF,
 	START,
 	grammar_rule_structures::{Prim, Symbol},
 	scanning::RuleMap,
@@ -252,9 +253,8 @@ impl<'a> SymMap<'a> {
 			.copied()           //Item = &str
 			.filter(is_term)
 			.collect();
-		debug_assert!(!terms.contains(&"eof"));
-		terms.insert("eof");
-		let terms: Vec<_> = terms.into_iter().collect();
+		assert!(terms.insert(EOF));
+		let terms: Vec<_> = terms.iter().copied().collect();
 		debug_assert!(is_sorted(&terms));
 		Self { non_terms, terms }
 	}

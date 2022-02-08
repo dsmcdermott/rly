@@ -170,11 +170,13 @@
 //! Which matches at least one ASCII alphabetical character, followed by any combination
 //! of digits `0` through `9`, underscores `_`, or ASCII alphabetical characters.
 //!
-//! ### "Start" and "eof"
+//! ### The `Start` symbol.
 //!
-//! The symbols `Start` and `eof` are special: `eof` is reserved and cannot be used as a
-//! symbol, and the symbol `Start` must occur exactly once, on the left-hand side of a
-//! production rule.
+//! The symbol `Start` is special: `Start` must occur exactly once, on the left-hand side
+//! of a production rule. That is, there must be one and only one production rule that
+//! takes `Start` as its input, and `Start` cannot appear on the right-hand side of any
+//! rules. When parsing, `Start` is taken to be the starting symbol to which the
+//! production rules are recursively applied.
 //!
 //! ## Semantics
 //!
@@ -187,7 +189,7 @@
 //!
 //! Given an input sequence of terminal symbols (paired with their original values,) the
 //! parser attempts to generate a _derivation history_ for the sequence which describes
-//! how to generate that sequence by starting with the [`Start`](crate#start-and-eof)
+//! how to generate that sequence by starting with the [`Start`](crate#the-start-symbol)
 //! symbol, and recurively applying production rules untill the appropriate sequence of
 //! non-terminals is produced.
 //!
@@ -719,6 +721,8 @@ pub use grammar_rule_structures::Prim;
 mod grammar_rules;
 
 const START: &'static str = "Start";
+
+const EOF: &'static str = "$";
 
 mod table_construction;
 

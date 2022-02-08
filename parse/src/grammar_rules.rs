@@ -2,7 +2,7 @@
 // organising information about the rules of a particular grammar for use in building
 // parser tables. In particular it provides the right-hand-sides of a given non-terminal
 // with the method 'get' and it is responsable for generating and providing the first sets
-// for symbols. It also provides the symbols used for 'Start' and 'eof'.
+// for symbols. It also provides the symbols used for 'start' and 'eof'.
 
 use std::{
 	boxed::Box,

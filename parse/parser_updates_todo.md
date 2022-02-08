@@ -4,7 +4,7 @@ anything with the prefix `Parse`, as well as rust's disallowed raw identifier va
 
 - [x] Change `start` to `Start`.
 
-- [ ] Change `eof` to `$` so that it does not conflict with any legal identifiers.
+- [x] Change `eof` to `$` so that it does not conflict with any legal identifiers.
 
 - [ ] Make rust's disallowed raw identifier values reserved.
 

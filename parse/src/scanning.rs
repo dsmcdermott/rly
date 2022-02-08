@@ -8,9 +8,9 @@
 // RULE ::= IDENT '->' IDENT+ ';'
 // Whitespace (including newlines) is ignored.
 //
-// START and "eof" are special identifiers. There must be exactly one rule with START as
-// the left-hand-side and START cannot appear on the right-hand-side of any rules. "eof"
-// is reserved and cannot be used.
+// START and EOF are special identifiers. There must be exactly one rule with START as the
+// left-hand-side and START cannot appear on the right-hand-side of any rules. EOF is
+// reserved and cannot be used (EOF is now '$', which is an invalid name anyway.)
 use crate::START;
 
 use std::{boxed::Box, collections::HashMap};
@@ -97,8 +97,6 @@ mod error {
 		NoStart,
 		/// Multiple rules for "`Start`".
 		DuplicateStart(ErrorData),
-		/// Reserved identifier "`eof`" used.
-		EofUsed(ErrorData),
 		/// Source is empty.
 		EmptyInput,
 	}
@@ -118,7 +116,7 @@ mod error {
 			}
 			let check_ident = |name: &str| {
 				if let Some(mtch) = ident.find(name) {
-					(mtch.end() == name.len()) && (name != "eof")
+					mtch.end() == name.len()
 				} else {
 					false
 				}
@@ -160,7 +158,6 @@ mod error {
 				MissingDiv(data) => write(f, "Missing '->'", data),
 				MissingTerm(data) => write(f, "Missing closing ';'", data),
 				DuplicateStart(data) => write(f, format_args!("Only one rule for '{}' allowed", START), data),
-				EofUsed(data) => write(f, "'eof' is a reserved value", data),
 				NoStart => wnd(format_args!("Must have a rule for '{}'", START), f),
 				EmptyInput => wnd("Input is empty", f),
 			}
@@ -213,9 +210,8 @@ impl<'a> Scanner<'a> {
 
 	fn find_name(&self) -> Result<Match<'a>> {
 		match self.find(self.name()) {
-			Some(rmatch) if rmatch.as_str() != "eof" => Ok(rmatch),
+			Some(rmatch)  => Ok(rmatch),
 			None => Err(self.err(SrcError::InvalidIdent)),
-			_ => Err(self.err(SrcError::EofUsed)),
 		}
 	}
 

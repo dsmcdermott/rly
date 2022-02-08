@@ -11,6 +11,7 @@
 
 use crate::{
 	START,
+	EOF,
 	error::ParserError,
 	grammar_rule_structures::Prim,
 	grammar_rules::GrammarRules,
@@ -131,7 +132,7 @@ where
 		rules: &HashMap<&'a str, Vec<Box<[&'a str]>>>,
 	) -> Result<Self, InvalidDiscriminant> {
 		let start = map.non_term_val(START).unwrap();
-		let eof = map.term_val("eof").unwrap();
+		let eof = map.term_val(EOF).unwrap();
 		let rules = GrammarRules::new(map.grammar_rules(rules)?, start, eof);
 		Ok(Self { map, rules })
 	}
