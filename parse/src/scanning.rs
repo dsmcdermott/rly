@@ -27,10 +27,11 @@ use rly_common::errors::ErrorData;
 // might be more confusing at a glance
 pub type RuleMap<'a> = HashMap<&'a str, Vec<Box<[&'a str]>>>;
 
-const NAME: &'static str = "^[[:alpha:]][0-9_[:alpha:]]*";
+const NAME: &'static str = r"^(\p{XID_Start}\p{XID_Continue}*)|(_\p{XID_Continue}*)";
 const DIV: &'static str = "^->";
 const TERM: &'static str = "^;";
-const IGNORE: &'static str = "^[[:space:]]+";
+const IGNORE: &'static str = r"^\p{Pattern_White_Space}+";
+const RESERVED: &'static str = "^(crate)|(self)|(super)|(Self)$";
 
 // Scans its input 'inp' to generate a RuleMap. name, div, term, and ignore are all
 // generated according to the constants above. The input is parsed using a kind of
@@ -43,6 +44,7 @@ pub struct Scanner<'a> {
 	div: Regex,
 	term: Regex,
 	ignore: Regex,
+	reserved: Regex,
 }
 
 mod error {
@@ -97,8 +99,12 @@ mod error {
 		NoStart,
 		/// Multiple rules for "`Start`".
 		DuplicateStart(ErrorData),
+		/// "`Start`" is used on the right-hand side of a rule.
+		StartRHS(ErrorData),
 		/// Source is empty.
 		EmptyInput,
+		/// A Rule with an empty right-hand side.
+		EmptyRHS(ErrorData),
 	}
 
 	impl SrcError {
@@ -158,6 +164,8 @@ mod error {
 				MissingDiv(data) => write(f, "Missing '->'", data),
 				MissingTerm(data) => write(f, "Missing closing ';'", data),
 				DuplicateStart(data) => write(f, format_args!("Only one rule for '{}' allowed", START), data),
+				StartRHS(data) => write(f, format_args!("'{}' cannot be used on the right-hand side of a rule", START), data),
+				EmptyRHS(data) => write(f, "Rules cannot have an empty right-hand side", data),
 				NoStart => wnd(format_args!("Must have a rule for '{}'", START), f),
 				EmptyInput => wnd("Input is empty", f),
 			}
@@ -181,6 +189,7 @@ impl<'a> Scanner<'a> {
 			div: Regex::new(DIV).unwrap(),
 			term: Regex::new(TERM).unwrap(),
 			ignore: Regex::new(IGNORE).unwrap(),
+			reserved: Regex::new(RESERVED).unwrap(),
 		}
 	}
 
@@ -200,12 +209,32 @@ impl<'a> Scanner<'a> {
 		&self.ignore
 	}
 
+	fn reserved(&self) -> &Regex {
+		&self.reserved
+	}
+
 	fn find(&self, reg: &Regex) -> Option<Match<'a>> {
 		reg.find(&self.inp[self.pos..])
 	}
 
 	fn find_ignore(&self) -> Option<Match<'a>> {
 		self.find(self.ignore())
+	}
+
+	fn check_name(&self, s: &str) -> Result<()> {
+		if self.reserved().is_match(s) {
+			Err(self.err(SrcError::InvalidIdent))
+		} else {
+			Ok(())
+		}
+	}
+
+	fn check_is_start(&self, s: &str) -> Result<()> {
+		if s == START {
+			Err(self.err(SrcError::StartRHS))
+		} else {
+			Ok(())
+		}
 	}
 
 	fn find_name(&self) -> Result<Match<'a>> {
@@ -234,6 +263,7 @@ impl<'a> Scanner<'a> {
 	fn expect_lhs(&mut self) -> Result<&'a str> {
 		let rmatch = self.find_name()?;
 		let name = rmatch.as_str();
+		self.check_name(name)?;
 		if name == START && self.rules.contains_key(&name) {
 			return Err(self.err(SrcError::DuplicateStart));
 		};
@@ -245,7 +275,14 @@ impl<'a> Scanner<'a> {
 		self.expect_none();
 		let rmatch = self.find_div()?;
 		self.update(rmatch);
-		Ok(())
+		let n = self.pos;
+		self.expect_none();
+		if self.term().is_match(&self.inp[self.pos..]) {
+			self.pos = n;
+			Err(self.err(SrcError::EmptyRHS))
+		} else {
+			Ok(())
+		}
 	}
 
 	// Parses a single symbol on the right-hand-side of a production rule. If no symbols
@@ -253,8 +290,11 @@ impl<'a> Scanner<'a> {
 	fn expect_rhs(&mut self) -> Result<Option<&'a str>> {
 		self.expect_none();
 		Ok(if let Some(rmatch) = self.find(self.name()) {
+			let name = rmatch.as_str();
+			self.check_name(name)?;
+			self.check_is_start(name)?;
 			self.update(rmatch);
-			Some(rmatch.as_str())
+			Some(name)
 		} else {
 			self.expect_term()?;
 			None
@@ -309,7 +349,6 @@ impl<'a> Scanner<'a> {
 	}
 
 	fn find_err(&self) -> ErrorData {
-		println!("{} {}", self.inp.len(), self.pos);
 		ErrorData::find(&self.inp, self.pos).unwrap()
 	}
 
