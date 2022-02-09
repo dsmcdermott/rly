@@ -16,7 +16,7 @@ pub use scanning::SrcError;
 
 mod sym_map;
 
-pub use sym_map::{FromUsize, IntoUsize, InvalidDiscriminant};
+pub use sym_map::{Discriminant, InvalidDiscriminant};
 
 mod grammar_spec;
 

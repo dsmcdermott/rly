@@ -64,9 +64,9 @@ representations of symbols by a [`Rules`] and [`ParserSpec`] when generating a p
 Generally speaking, there are two different discriminant types to specify when
 building a parser: the discriminant for non-terminal symbols (that is, the symbols
 that can appear on the left-hand side a [production rule][pr]) and the discriminant
-for terminal symbols. A discriminant type must implement [`Prim`], [`FromUsize`], and
-[`IntoUsize`], and should be capable of avoiding collisions for the number of symbols
-that it's required to differentiate.
+for terminal symbols. A discriminant type must implement [`Prim`] as well as
+[`Discriminant`], and should be capable of avoiding collisions for the number of
+symbols that it's required to differentiate.
 
 If you're unsure what to use for a discriminant, [`u32`] is a good default, and is
 also used by the [`build_parser!`] macro as the default type for both terminal and

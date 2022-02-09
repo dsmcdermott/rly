@@ -16,7 +16,7 @@ use crate::{
 	grammar_rule_structures::Prim,
 	grammar_rules::GrammarRules,
 	scanning::{Scanner, SrcError},
-	sym_map::{FromUsize, IntoUsize, InvalidDiscriminant, SymMap},
+	sym_map::{Discriminant, InvalidDiscriminant, SymMap},
 	table_construction::Table,
 };
 use std::{
@@ -124,8 +124,8 @@ impl<'a, N: Prim, T: Prim> Rules<'a, N, T> {
 
 impl<'a, N, T> Rules<'a, N, T>
 where
-	N: Prim + FromUsize,
-	T: Prim + FromUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn from_sym_map(
 		map: SymMap<'a>,
@@ -204,8 +204,8 @@ where
 
 impl<'a, N, T> Rules<'a, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	/// Generates a [`ParserSpec`] and uses it to write a parser module to `fout`.
 	///
@@ -370,7 +370,7 @@ impl<'a, 'b, N: Prim, T: Prim> ParserSpec<'a, 'b, N, T> {
 	}
 }
 
-impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> {
+impl<'a, 'b, N: Prim + Discriminant, T: Prim + Discriminant> ParserSpec<'a, 'b, N, T> {
 	fn display(&self) -> ParserDisplay<'a, 'b, '_, N, T> {
 		ParserDisplay(self)
 	}
@@ -446,8 +446,8 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 
 //pub fn write_from_rules<'a, 'b, N, T, W>(rules: &'b Rules<'a, N, T>, fout: W) -> io::Result<()>
 //where
-//	N: Prim + IntoUsize,
-//	T: Prim + IntoUsize,
+//	N: Prim + Discriminant,
+//	T: Prim + Discriminant,
 //	W: Write,
 //{
 //	ParserSpec::new(rules).write(fout)
@@ -455,8 +455,8 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 
 //pub fn write_from_rule_map<'a, N, T, W>(map: &HashMap<&'a str, Vec<Box<[&'a str]>>>, fout: W) -> io::Result<()>
 //where
-//	N: Prim + IntoUsize + FromUsize,
-//	T: Prim + IntoUsize + FromUsize,
+//	N: Prim + Discriminant,
+//	T: Prim + Discriminant,
 //	W: Write,
 //{
 //	Rules::<'a, N, T>::from_rule_map(map).gen_spec().write(fout)
@@ -485,8 +485,8 @@ impl<'a, 'b, N: Prim + IntoUsize, T: Prim + IntoUsize> ParserSpec<'a, 'b, N, T> 
 /// ```
 pub fn write_from_src<'a, N, T, W, S>(src: &'a S, fout: W) -> Result<(), Box<dyn std::error::Error>>
 where
-	N: Prim + IntoUsize + FromUsize,
-	T: Prim + IntoUsize + FromUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 	W: Write,
 	S: AsRef<str> + ?Sized,
 {
@@ -515,11 +515,11 @@ impl<'a, 'b> Display for Names<'a, 'b> {
 
 struct Shifts<'a, 'b, T>(&'b SymMap<'a>, Vec<(T, usize)>)
 where
-	T: Prim + IntoUsize;
+	T: Prim + Discriminant;
 
 impl<'a, 'b, T> Display for Shifts<'a, 'b, T>
 where
-	T: Prim + IntoUsize,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		Ok(for (term, goto) in self.1.iter().copied() {
@@ -535,13 +535,13 @@ where
 
 struct Reductions<'a, 'b, N, T>(&'b Rules<'a, N, T>, Vec<(T, (N, usize))>)
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize;
+	N: Prim + Discriminant,
+	T: Prim + Discriminant;
 
 impl<'a, 'b, N, T> Display for Reductions<'a, 'b, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		let mut write = |la: std::fmt::Arguments<'_>, lhs: &N, n: &usize| {
@@ -569,11 +569,11 @@ where
 
 struct Gotos<'a, 'b, N>(&'b SymMap<'a>, Vec<(N, usize)>)
 where
-	N: Prim + IntoUsize;
+	N: Prim + Discriminant;
 
 impl<'a, 'b, N> Display for Gotos<'a, 'b, N>
 where
-	N: Prim + IntoUsize,
+	N: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		Ok(for (sym, goto) in self.1.iter().copied() {
@@ -612,13 +612,13 @@ r#"
 
 struct TableDetails<'a, 'b, 'c, N, T>(&'b SymMap<'a>, &'c Table<'b, N, T>)
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize;
+	N: Prim + Discriminant,
+	T: Prim + Discriminant;
 
 impl<'a, 'b, 'c, N, T> Display for TableDetails<'a, 'b, 'c, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		self.1.display_items(
@@ -631,13 +631,13 @@ where
 
 struct State<'a, 'b, 'c, N, T>(&'b Rules<'a, N, T>, &'c Table<'b, N, T>)
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize;
+	N: Prim + Discriminant,
+	T: Prim + Discriminant;
 
 impl<'a, 'b, 'c, N, T> Display for State<'a, 'b, 'c, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		let (shifts, reductions, gotos) = self.1.actions();
@@ -678,13 +678,13 @@ where
 
 struct States<'a, 'b, 'c, N, T>(&'c ParserSpec<'a, 'b, N, T>)
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize;
+	N: Prim + Discriminant,
+	T: Prim + Discriminant;
 
 impl<'a, 'b, 'c, N, T> Display for States<'a, 'b, 'c, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		Ok(for table in &self.0.tables {
@@ -695,8 +695,8 @@ where
 
 impl<'a, 'b, N, T> ParserSpec<'a, 'b, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn token_kind(&self) -> &str {
 		"use super::lexer::TokenKind;"
@@ -723,8 +723,8 @@ pub struct ParserDisplay<'a, 'b, 'c, N: Prim, T: Prim>(&'c ParserSpec<'a, 'b, N,
 
 impl<'a, 'b, 'c, N, T> Display for ParserDisplay<'a, 'b, 'c, N, T>
 where
-	N: Prim + IntoUsize,
-	T: Prim + IntoUsize,
+	N: Prim + Discriminant,
+	T: Prim + Discriminant,
 {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		write!(

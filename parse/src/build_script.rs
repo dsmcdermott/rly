@@ -1,7 +1,7 @@
 // This module contains a struct and two macros to help with generating a parser as a part
 // of a cargo build script and including it in the crate in question.
 
-use crate::{BuilderError, FromUsize, IntoUsize, ParserError, ParserSpec, Prim, Rules};
+use crate::{BuilderError, Discriminant, ParserError, ParserSpec, Prim, Rules};
 use rly_common::builders::{check_is_cargo_run, BuilderBase};
 use std::{
 	env,
@@ -369,7 +369,7 @@ impl ParserBuilder {
 	/// ```
 	///
 	/// [`self.src()`]: ParserBuilder::src
-	pub fn scan_src<N: Prim + FromUsize, T: Prim + FromUsize>(
+	pub fn scan_src<N: Prim + Discriminant, T: Prim + Discriminant>(
 		&self,
 	) -> Option<Result<Rules<'_, N, T>, ParserError>> {
 		self.src().map(|src| Rules::new(src))
@@ -392,14 +392,14 @@ impl ParserBuilder {
 	/// # Ok(())
 	/// # }
 	/// ```
-	pub fn get_rules<N: Prim + FromUsize, T: Prim + FromUsize>(
+	pub fn get_rules<N: Prim + Discriminant, T: Prim + Discriminant>(
 		&mut self,
 	) -> Result<Rules<'_, N, T>, ParserError> {
 		let src = self.load_file()?;
 		Ok(Rules::new(src)?)
 	}
 
-	fn write_module_with_name<N: Prim + IntoUsize, T: Prim + IntoUsize, P: AsRef<Path>>(
+	fn write_module_with_name<N: Prim + Discriminant, T: Prim + Discriminant, P: AsRef<Path>>(
 		&self,
 		spec: &ParserSpec<'_, '_, N, T>,
 		name: P,
@@ -433,8 +433,8 @@ impl ParserBuilder {
 	/// ```
 	pub fn build<N, T>(&mut self) -> Result<&mut Self, ParserError>
 	where
-		N: Prim + FromUsize + IntoUsize,
-		T: Prim + FromUsize + IntoUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		self.load_file()?;
 		let rules = self.scan_src::<N, T>().unwrap()?;
@@ -461,8 +461,8 @@ impl ParserBuilder {
 
 	pub fn build_parser<N, T>() -> Result<Self, ParserError>
 	where
-		N: Prim + FromUsize + IntoUsize,
-		T: Prim + FromUsize + IntoUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		let mut builder =
 			Self::new().expect("ParserBuilder::build_parser not being run in a build script");

@@ -2,19 +2,15 @@
 // processing the mapping between discriminants for terminal and non-terminal symbols and
 // the str representations of those symbols.
 //
-// To be converted from a str, a discriminant type must implement FromUsize, and to be
-// converted, a discriminant type must implement IntoUsize.
+// To be converted to or from a str, a discriminant type must implement Discriminant.
 //
 // SymMap converts between str's and discriminants by keeping a Vec of str's for non-terms
 // and a Vec of str's for terminals, both of which are sorted. To convert from a
-// discriminant to a str, IntoUsize::into is called on the discriminant and the resulting
-// value is used as an index into the corresponding Vec of str's to retrieve the str value
-// of the discriminant. To convert from a str to a discriminant, the string is found in
-// the corresponding vector using slice::binary_search(), and FromUsize::from is called on
-// the resulting index to get the discriminant.
-
-// TODO: Combine FromUsize and IntoUsize into a single trait; I dont see the sense in
-// keeping them seperate anymore.
+// discriminant to a str, Discriminant::into is called on the discriminant and the
+// resulting value is used as an index into the corresponding Vec of str's to retrieve the
+// str value of the discriminant. To convert from a str to a discriminant, the string is
+// found in the corresponding vector using slice::binary_search(), and Discriminant::from
+// is called on the resulting index to get the discriminant.
 
 use std::{
 	collections::BTreeSet,
@@ -29,39 +25,27 @@ use crate::{
 	scanning::RuleMap,
 };
 
-/// A trait for converting from [`usize`] to a discriminant. This is required for
-/// generating a [`Rules`](super::Rules) or [`ParserSpec`](super::ParserSpec) from a
-/// source text.
+/// A trait for [discriminant types].
 ///
-/// A type that implements both [`FromUsize`] and [`Eq`] must ensure that the
-/// implementation of [`from`](FromUsize::from) must preserve and reflect equality, e.g.:
+/// [`Discriminant`] describes how to convert a type to and from [`usize`], as well as the
+/// maximum [`usize`] value it's interoperable with. This is used internally when
+/// generating parsers to convert between [discriminant types] and indexes into
+/// collections of [`str`]'s representing the original symbols.
 ///
-/// ```
-/// use parse::FromUsize;
-///
-/// fn test_eq<T: Eq + FromUsize>(l: usize, r: usize) {
-/// 	let is_eq_int = l == r;
-/// 	let is_eq = T::from(l) == T::from(r);
-/// 	assert_eq!(is_eq_int, is_eq);	// l == r if and only if T::from(l) == T::from(r)
-/// }
-/// ```
-///
-/// # Implementing both FromUsize and IntoUsize
-///
-/// If a type implements both [`FromUsize`] and [`IntoUsize`], it should ensure that
-/// [`from`] and [`into`] are isomorphisms. That is, calling [`from`] and then [`into`]
-/// should return the same number as the one you started with (or panic,) and calling
-/// [`into`] and then [`from`] should return an equivalent object to the original (or
-/// panic.) For example:
+/// If a type implements both [`Discriminant`] and [`Eq`], then [`Self::from`] and
+/// [`Self::into`] should be isomorphisms when restricted to their valid values. That is,
+/// chaining [`Self::from`] with [`Self::into`] should produce the same number as the one
+/// you started with (or panic,) and chaining [`Self::into`] with [`Self::from`] should
+/// produce a result equal to the original (or panic.) For example:
 ///
 /// ```
-/// use parse::{FromUsize, IntoUsize};
+/// use parse::Discriminant;
 ///
-/// fn endo_t<T: FromUsize + IntoUsize>(t: T) -> T {
-/// 	T::from(t.into())
+/// fn endo_t<T: Discriminant>(t: T) -> T {
+/// 	<T as Discriminant>::from(t.into())
 /// }
 ///
-/// fn endo_usize<T: FromUsize + IntoUsize>(n: usize) -> usize {
+/// fn endo_usize<T: Discriminant>(n: usize) -> usize {
 /// 	T::from(n).into()
 /// }
 ///
@@ -69,9 +53,8 @@ use crate::{
 /// assert_eq!(128, endo_usize::<u8>(128));
 /// ```
 ///
-/// [`into`]: IntoUsize::into
-/// [`from`]: FromUsize::from
-pub trait FromUsize {
+/// [discriminant types](crate#discriminants)
+pub trait Discriminant {
 	/// The maximum size that `Self` can be converted from.
 	const MAX: usize;
 
@@ -79,127 +62,63 @@ pub trait FromUsize {
 	/// [`Self::MAX`], otherwise returns [`Some`]. For exmple:
 	///
 	/// ```
-	/// use parse::FromUsize;
+	/// use parse::Discriminant;
 	///
-	/// assert_eq!(<u8 as FromUsize>::MAX, 255);
+	/// assert_eq!(<u8 as Discriminant>::MAX, 255);
 	///
-	/// let none = <u8 as FromUsize>::try_from(256);
-	/// let some = <u8 as FromUsize>::try_from(255);
+	/// let none = <u8 as Discriminant>::try_from(256);
+	/// let some = <u8 as Discriminant>::try_from(255);
 	///
 	/// assert!(matches!(none, None));
 	/// assert!(matches!(some, Some(255)));
 	/// ```
+	///
+	/// See also the [requirements](Discriminant) for a type that implements both 
+	/// [`Discriminant`] and [`Eq`].
 	fn try_from(n: usize) -> Option<Self>
 	where
 		Self: Sized;
 
-	/// Equivalent to [`Self::try_from(n).unwrap()`](FromUsize::try_from).
+	/// Equivalent to [`Self::try_from(n).unwrap()`](Discriminant::try_from).
 	///
 	/// # Panic
 	///
 	/// Implementations should panic if `n` is greater than [`Self::MAX`]. Otherwise, the
 	/// result should be the same as calling [`unwrap`](Option::unwrap) on the result of
 	/// [`Self::try_from`].
-	///
 	fn from(n: usize) -> Self
 	where
 		Self: Sized,
 	{
-		Self::try_from(n).expect("called FromUsize::from on an invalid value")
+		Self::try_from(n).expect("called Discriminant::from on an invalid value")
 	}
-}
 
-//impl<T> FromUsize for T
-//	where
-//		T: TryFrom<usize, Error = TryFromIntError>,
-//{
-//	fn from(n: usize) -> Self {
-//		Self::try_from(n).unwrap()
-//	}
-//}
-
-macro_rules! impl_from_usize {
-	($($size: ty),*) => {
-		$(impl FromUsize for $size {
-			const MAX: usize = Self::MAX as usize;
-			fn try_from(n: usize) -> Option<Self> {
-				<Self as TryFrom<usize>>::try_from(n).ok()
-			}
-		})*
-	};
-}
-
-impl_from_usize!(u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, usize, isize);
-
-/// A trait for converting from a discriminant to [`usize`]. This is required for writing
-/// a parser using a [`ParserSpec`](super::ParserSpec).
-///
-/// A type that implements both [`IntoUsize`] and [`Eq`] must ensure that the
-/// implementation of [`into`] must preserve and reflect equality, e.g.:
-///
-/// ```
-/// use parse::IntoUsize;
-///
-/// fn test_eq<T: Eq + IntoUsize>(l: T, r: T) {
-/// 	let is_eq = &l == &r;
-/// 	let is_eq_int = l.into() == r.into();
-/// 	assert_eq!(is_eq, is_eq_int);	// l == r if and only if l.into() == r.into()
-/// }
-/// ```
-///
-/// # Implementing both FromUsize and IntoUsize
-///
-/// If a type implements both [`FromUsize`] and [`IntoUsize`], it should ensure that
-/// [`from`] and [`into`] are isomorphisms. That is, calling [`from`] and then [`into`]
-/// should return the same number as the one you started with (or panic,) and calling
-/// [`into`] and then [`from`] should return an equivalent object to the original (or
-/// panic.) For example:
-///
-/// ```
-/// use parse::{FromUsize, IntoUsize};
-///
-/// fn endo_t<T: FromUsize + IntoUsize>(t: T) -> T {
-/// 	T::from(t.into())
-/// }
-///
-/// fn endo_usize<T: FromUsize + IntoUsize>(n: usize) -> usize {
-/// 	T::from(n).into()
-/// }
-///
-/// assert_eq!(128u8, endo_t(128u8));
-/// assert_eq!(128, endo_usize::<u8>(128));
-/// ```
-///
-/// [`into`]: IntoUsize::into
-/// [`from`]: FromUsize::from
-pub trait IntoUsize {
 	/// Converts `self` into a [`usize`].
 	///
-	/// If `Self` implements both [`FromUsize`] and [`IntoUsize`], then this function
-	/// should always return [`Some`] on a value that can be generated by [`FromUsize`].
+	/// This function should always return [`Some`] on a value that can be generated by
+	/// [`from`](Self::from) or [`try_from`](Self::try_from).
 	///
 	/// ```
-	/// use parse::{FromUsize, IntoUsize};
+	/// use parse::Discriminant;
 	///
-	/// let n = <u8 as FromUsize>::from(128);
+	/// let n = <u8 as Discriminant>::from(128);
 	///
-	/// let result = <u8 as IntoUsize>::try_into(n);
+	/// let result = <u8 as Discriminant>::try_into(n);
 	///
 	/// assert!(matches!(result, Some(_)));
 	/// ```
 	///
-	/// See also the requirements
-	/// [here](IntoUsize#implementing-both-fromusize-and-intousize) for a type that
-	/// implements both [`FromUsize`] and [`IntoUsize`].
+	/// See also the [requirements](Discriminant) for a type that implements both 
+	/// [`Discriminant`] and [`Eq`].
 	fn try_into(self) -> Option<usize>
 	where
 		Self: Sized;
 
-	/// Equivalent to calling [`self.try_into().unwrap()`](IntoUsize::try_into).
+	/// Equivalent to calling [`self.try_into().unwrap()`](Discriminant::try_into).
 	///
 	/// # Panic
 	///
-	/// Implementations should panic when [try_into](IntoUsize::try_into) would return
+	/// Implementations should panic when [try_into](Discriminant::try_into) would return
 	/// [`None`]. Otherwise, they should return the equivalent of calling
 	/// [`unwrap`](Option::unwrap) on [`self.try_into`].
 	fn into(self) -> usize
@@ -207,22 +126,19 @@ pub trait IntoUsize {
 		Self: Sized,
 	{
 		self.try_into()
-			.expect("called IntoUsize::into on an invalid value")
+			.expect("called Discriminant::into on an invalid value")
 	}
 }
 
-//impl<T> IntoUsize for T
-//where
-//	T: TryInto<usize, Error = TryFromIntError>,
-//{
-//	fn into(self) -> usize {
-//		self.try_into().unwrap()
-//	}
-//}
-
-macro_rules! impl_into_usize {
+macro_rules! impl_discriminant {
 	($($size: ty),*) => {
-		$(impl IntoUsize for $size {
+		$(impl Discriminant for $size {
+			const MAX: usize = Self::MAX as usize;
+
+			fn try_from(n: usize) -> Option<Self> {
+				<Self as TryFrom<usize>>::try_from(n).ok()
+			}
+
 			fn try_into(self) -> Option<usize> {
 				<Self as TryInto<usize>>::try_into(self).ok()
 			}
@@ -230,7 +146,7 @@ macro_rules! impl_into_usize {
 	};
 }
 
-impl_into_usize!(u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, usize, isize);
+impl_discriminant!(u8, i8, u16, i16, u32, i32, u64, i64, u128, i128, usize, isize);
 
 #[derive(Debug)]
 pub struct SymMap<'a> {
@@ -260,20 +176,20 @@ impl<'a> SymMap<'a> {
 	}
 
 	// Panics when the index of 'name' in self.non_terms is greater than T::MAX
-	pub fn non_term_val<T: FromUsize>(&self, name: &str) -> Option<T> {
+	pub fn non_term_val<T: Discriminant>(&self, name: &str) -> Option<T> {
 		search(&self.non_terms, name)
 	}
 
 	// Panics when the index of 'name' in self.terms is greater than T::MAX
-	pub fn term_val<T: FromUsize>(&self, name: &str) -> Option<T> {
+	pub fn term_val<T: Discriminant>(&self, name: &str) -> Option<T> {
 		search(&self.terms, name)
 	}
 
-	pub fn non_term<T: IntoUsize>(&self, sym: T) -> &'a str {
+	pub fn non_term<T: Discriminant>(&self, sym: T) -> &'a str {
 		self.non_terms[sym.into()]
 	}
 
-	pub fn term<T: IntoUsize>(&self, sym: T) -> &'a str {
+	pub fn term<T: Discriminant>(&self, sym: T) -> &'a str {
 		self.terms[sym.into()]
 	}
 
@@ -285,19 +201,19 @@ impl<'a> SymMap<'a> {
 		&self.non_terms
 	}
 
-	fn is_valid_non_term_discrim<N: FromUsize>(&self) -> Result<(), InvalidDiscriminant> {
+	fn is_valid_non_term_discrim<N: Discriminant>(&self) -> Result<(), InvalidDiscriminant> {
 		(self.non_terms().len() <= N::MAX)
 			.then(|| ())
 			.ok_or(InvalidDiscriminant::NonTerm)
 	}
 
-	fn is_valid_term_discrim<T: FromUsize>(&self) -> Result<(), InvalidDiscriminant> {
+	fn is_valid_term_discrim<T: Discriminant>(&self) -> Result<(), InvalidDiscriminant> {
 		(self.terms().len() <= T::MAX)
 			.then(|| ())
 			.ok_or(InvalidDiscriminant::Term)
 	}
 
-	fn are_valid_discrims<N: FromUsize, T: FromUsize>(&self) -> Result<(), InvalidDiscriminant> {
+	fn are_valid_discrims<N: Discriminant, T: Discriminant>(&self) -> Result<(), InvalidDiscriminant> {
 		self.is_valid_non_term_discrim::<N>()
 			.and_then(|_| self.is_valid_term_discrim::<T>())
 	}
@@ -305,8 +221,8 @@ impl<'a> SymMap<'a> {
 	fn sym_vec<'s, I, N, T>(&self, iter: I) -> Vec<Symbol<N, T>>
 	where
 		I: IntoIterator<Item = &'s str>,
-		N: Prim + FromUsize,
-		T: Prim + FromUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		let mut vec = Vec::new();
 		for sym in iter {
@@ -329,8 +245,8 @@ impl<'a> SymMap<'a> {
 		rules: &'b RuleMap<'a>,
 	) -> Result<GrammarRules<'a, 'b, N, T>, InvalidDiscriminant>
 	where
-		N: Prim + FromUsize,
-		T: Prim + FromUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		self.are_valid_discrims::<N, T>()
 			.map(|_| GrammarRules::new(self, rules).unwrap())
@@ -365,7 +281,7 @@ impl fmt::Display for InvalidDiscriminant {
 impl error::Error for InvalidDiscriminant {}
 
 mod grammar_rules {
-	use super::{FromUsize, RuleMap, SymMap};
+	use super::{Discriminant, RuleMap, SymMap};
 	use crate::grammar_rule_structures::{GrammarRule, Prim};
 	use std::{collections::hash_map, marker::PhantomData, slice};
 
@@ -412,8 +328,8 @@ mod grammar_rules {
 
 	impl<'a, 'b, N, T> GrammarRules<'a, 'b, N, T>
 	where
-		N: Prim + FromUsize,
-		T: Prim + FromUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		pub(crate) fn new(map: &'b SymMap<'a>, rules: &'b RuleMap<'a>) -> Option<Self> {
 			let mut iter = rules.iter();
@@ -431,8 +347,8 @@ mod grammar_rules {
 
 	impl<'a, 'b, N, T> Iterator for GrammarRules<'a, 'b, N, T>
 	where
-		N: Prim + FromUsize,
-		T: Prim + FromUsize,
+		N: Prim + Discriminant,
+		T: Prim + Discriminant,
 	{
 		type Item = GrammarRule<N, T>;
 
@@ -452,7 +368,7 @@ pub use grammar_rules::GrammarRules;
 // Panics when the index of 'name' is greater than T::MAX
 fn search<'a, T>(l: &[&'a str], name: &str) -> Option<T>
 where
-	T: FromUsize,
+	T: Discriminant,
 {
 	l.binary_search(&name).ok().map(|n| T::from(n))
 }
@@ -505,8 +421,8 @@ Fact ->
 
 	#[test]
 	fn test_impl_from_usize_max() {
-		use super::FromUsize;
-		assert_eq!(<u128 as FromUsize>::MAX, usize::MAX);
-		assert_eq!(<i128 as FromUsize>::MAX, usize::MAX);
+		use super::Discriminant;
+		assert_eq!(<u128 as Discriminant>::MAX, usize::MAX);
+		assert_eq!(<i128 as Discriminant>::MAX, usize::MAX);
 	}
 }
