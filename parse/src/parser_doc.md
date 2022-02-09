@@ -691,7 +691,7 @@ impl<'a, 's> Walker<'a, NonTerm, Token<'s>, ()> for Calculator {
 				assert_eq!(operands.len(), 1);
 				operands.pop().unwrap()
 			}
-			NonTerm::N_Start => unreachable!(),
+			NonTerm::Start => unreachable!(),
 		};
 		self.push(n);
 		None
