@@ -132,12 +132,12 @@
 //! These lexers are written as module named `lexer` containing 4 public items. These are:
 //!
 //! * An enum called `TokenKind`, whose variants are constants of the form
-//! `T_<name>`[^var_name] for each [token rule](crate#rules) except for [`ignore` and
+//! `<name>`[^var_name] for each [token rule](crate#rules) except for [`ignore` and
 //! `error`][ei] (if present,) and acts as the discriminant for [`Token`]'s returned by
 //! the lexer. `TokenKind` implements [`Debug`](std::fmt::Debug), [`Clone`], [`Copy`],
 //! [`PartialEq`], [`Eq`], [`PartialOrd`], [`Ord`], and [`Hash`](std::hash::Hash). It also
 //! implements [`Display`](std::fmt::Display), with the displayed value for a variant
-//! being the `<name>` part of `T_<name>`.
+//! being "`<name>`".
 //!
 //! [^var_name]: Yes, I know that this is not standard naming for `enum` variants, and
 //! yes, the `#[allow(nonstandard_style)]` flag is set for the whole module (and not just
@@ -672,16 +672,16 @@
 //!     };
 //!     // Match the token kind to determine how to proceed.
 //!     Ok(Some(match tok.kind() {
-//!         TokenKind::T_DEC => parse_dec(tok),
-//!         TokenKind::T_BIN => parse_bin(tok),
-//!         TokenKind::T_OCT => parse_oct(tok),
-//!         TokenKind::T_HEX => parse_hex(tok),
+//!         TokenKind::DEC => parse_dec(tok),
+//!         TokenKind::BIN => parse_bin(tok),
+//!         TokenKind::OCT => parse_oct(tok),
+//!         TokenKind::HEX => parse_hex(tok),
 //!         // If the current token is a unary "+" operator, just return the next parsed
 //!         // integer. ("+3" is the same as "3")
-//!         TokenKind::T_PLUS => parse_operand(tokens)?,
+//!         TokenKind::PLUS => parse_operand(tokens)?,
 //!         // If the current token is a unary "-" operator, return the negative version of
 //!         // the next integer.
-//!         TokenKind::T_MINUS => -parse_operand(tokens)?,
+//!         TokenKind::MINUS => -parse_operand(tokens)?,
 //!     }))
 //! }
 //!
@@ -707,8 +707,8 @@
 //!         // if the current token is "+", add the next integer, if it's "-" subtract the
 //!         // next one instead, if it's and intiger return an error
 //!         match tok.kind() {
-//!             TokenKind::T_PLUS => acc += parse_operand(&mut tokens)?,
-//!             TokenKind::T_MINUS => acc -= parse_operand(&mut tokens)?,
+//!             TokenKind::PLUS => acc += parse_operand(&mut tokens)?,
+//!             TokenKind::MINUS => acc -= parse_operand(&mut tokens)?,
 //!             _ => return Err(UnexpectedInt),
 //!         };
 //!     }

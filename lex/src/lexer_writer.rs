@@ -77,7 +77,7 @@ impl<'w, 'a> Display for TokenVariants<'w, 'a> {
 	fn fmt(&self, f: &mut Formatter) -> FmtResult {
 		for pair in self.0.rules.iter().enumerate() {
 			if let Some(rule) = self.0.is_user_rule(pair) {
-				write!(f, "\tT_{name},\n\t", name = rule.name())?;
+				write!(f, "\tr#{name},\n\t", name = rule.name())?;
 			};
 		}
 		Ok(())
@@ -92,7 +92,7 @@ impl<'w, 'a> Display for TokenDisplay<'w, 'a> {
 			if let Some(rule) = self.0.is_user_rule(pair) {
 				write!(
 					f,
-					"\tTokenKind::T_{name} => write!(f, {name:?}),\n\t\t\t\t",
+					"\tTokenKind::r#{name} => write!(f, {name:?}),\n\t\t\t\t",
 					name = rule.name()
 				)?;
 			};
@@ -107,7 +107,7 @@ impl<'w, 'a> Display for KindArrayElements<'w, 'a> {
 	fn fmt(&self, f: &mut Formatter) -> FmtResult {
 		for pair in self.0.rules.iter().enumerate() {
 			match self.0.is_user_rule(pair) {
-				Some(rule) => write!(f, " Some(TokenKind::T_{}),", rule.name()),
+				Some(rule) => write!(f, " Some(TokenKind::r#{}),", rule.name()),
 				None => write!(f, " None,"),
 			}?;
 		}

@@ -30,10 +30,10 @@ mod lexer {
 
 	#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 	pub enum TokenKind {
-		T_id,
-		T_mul,
-		T_sum,
-		T_int,
+		r#id,
+		r#mul,
+		r#sum,
+		r#int,
 	}
 
 	mod display {
@@ -43,16 +43,16 @@ mod lexer {
 		impl Display for TokenKind {
 			fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 				match self {
-					TokenKind::T_id => write!(f, "id"),
-					TokenKind::T_mul => write!(f, "mul"),
-					TokenKind::T_sum => write!(f, "sum"),
-					TokenKind::T_int => write!(f, "int"),
+					TokenKind::r#id => write!(f, "id"),
+					TokenKind::r#mul => write!(f, "mul"),
+					TokenKind::r#sum => write!(f, "sum"),
+					TokenKind::r#int => write!(f, "int"),
 				}
 			}
 		}
 	}
 
-	const KIND_ARRAY: [Option<TokenKind>; 6] = [ Some(TokenKind::T_id), Some(TokenKind::T_mul), Some(TokenKind::T_sum), None, Some(TokenKind::T_int), None, ];
+	const KIND_ARRAY: [Option<TokenKind>; 6] = [ Some(TokenKind::r#id), Some(TokenKind::r#mul), Some(TokenKind::r#sum), None, Some(TokenKind::r#int), None, ];
 
 	pub type Token<'a> = lex::Token<'a, TokenKind>;
 
