@@ -498,7 +498,7 @@ struct NonTermVariants<'a, 'b>(&'b SymMap<'a>);
 impl<'a, 'b> Display for NonTermVariants<'a, 'b> {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		Ok(for sym in self.0.non_terms() {
-			write!(f, "\tN_{},\n\t", sym)?;
+			write!(f, "\tr#{},\n\t", sym)?;
 		})
 	}
 }
@@ -508,7 +508,7 @@ struct Names<'a, 'b>(&'b SymMap<'a>);
 impl<'a, 'b> Display for Names<'a, 'b> {
 	fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
 		Ok(for sym in self.0.non_terms() {
-			write!(f, "\tNonTerm::N_{sym} => \"{sym}\",\n\t\t\t\t", sym = sym)?;
+			write!(f, "\tNonTerm::r#{sym} => \"{sym}\",\n\t\t\t\t", sym = sym)?;
 		})
 	}
 }
@@ -547,7 +547,7 @@ where
 		let mut write = |la: std::fmt::Arguments<'_>, lhs: &N, n: &usize| {
 			write!(
 				f,
-				"{la} => return ret(NonTerm::N_{lhs}, val, {n}),\n\t\t\t\t",
+				"{la} => return ret(NonTerm::r#{lhs}, val, {n}),\n\t\t\t\t",
 				la = la,
 				lhs = self.0.map().non_term(*lhs),
 				n = n
@@ -579,7 +579,7 @@ where
 		Ok(for (sym, goto) in self.1.iter().copied() {
 			write!(
 				f,
-				"\n\t\t\t\t\t\tNonTerm::N_{sym} => self.s{goto}(AstNode::Branch(s)),",
+				"\n\t\t\t\t\t\tNonTerm::r#{sym} => self.s{goto}(AstNode::Branch(s)),",
 				sym = self.0.non_term(sym),
 				goto = goto
 			)?;
@@ -711,7 +711,7 @@ where
 	}
 
 	fn start(&self) -> String {
-		format!("N_{}", self.map().non_term(*self.gr().start()))
+		format!("r#{}", self.map().non_term(*self.gr().start()))
 	}
 
 	fn states(&self) -> States<'a, 'b, '_, N, T> {

@@ -155,7 +155,8 @@ Fact ->
 Fact->Term;
 ```
 
-A symbol can be describied by the following regex:
+A symbol can be describied by the following regex (with some
+[exceptions](reserved-symbols)):
 
 ```text
 	[[:alpha:]]([0-9_[:alpha:]])*
@@ -164,13 +165,20 @@ A symbol can be describied by the following regex:
 Which matches at least one ASCII alphabetical character, followed by any combination
 of digits `0` through `9`, underscores `_`, or ASCII alphabetical characters.
 
-### The `Start` symbol.
+### The `Start` symbol
 
 The symbol `Start` is special: `Start` must occur exactly once, on the left-hand side
 of a production rule. That is, there must be one and only one production rule that
 takes `Start` as its input, and `Start` cannot appear on the right-hand side of any
 rules. When parsing, `Start` is taken to be the starting symbol to which the
 production rules are recursively applied.
+
+### Reserved symbols
+
+The same names disallowed by rust for [use in raw identifiers][rr], namely `crate`,
+`self`, `super`, and `Self`, also cannot be used in parser specifications. This is due
+to how the symbols are implemented [in the generated parsers][ps], which relies on
+using raw identifiers.
 
 ## Semantics
 
@@ -292,9 +300,13 @@ The parser module contains five public items:
 * A type alias `Token<'a>`, which is an alias for [`lex::Token<'a, TokenKind>`].
 
 * An enum `NonTerm` which represents the [non-terminal symbols][term] of the grammar.
-The variants of `NonTerm` are `N_<sym>` for each non-terminal [symbol](crate#format)
-`<sym>` of the language. `NonTerm` implements [`Display`](std::fmt::Display),
+The variants of `NonTerm` are `<sym>` for each non-terminal [symbol](crate#format)
+`<sym>` of the language[^raw]. `NonTerm` implements [`Display`](std::fmt::Display),
 [`Debug`](std::fmt::Debug), [`Copy`], [`Ord`], and [`Hash`].
+
+[^raw]: If a symbol name happens to be a keyword, such as `continue` or `extern`, the
+enum variant can be accessed by using [raw identifiers][ri]. For example, the variant
+for a symbol called `loop` could be accessed as `NonTerm::r#loop`.
 
 * A struct `Ast<'a>` which implements [`ast::Ast`] with `NonTerm = NonTerm` and `Term
 = Token<'a>`, using the types `NonTerm` and `Token` described above. `Ast`'s represent
@@ -673,9 +685,9 @@ impl<'a, 's> Walker<'a, NonTerm, Token<'s>, ()> for Calculator {
 	fn exit(&mut self, tree: &'a Ast<NonTerm, Token<'s>>) -> Option<()> {
 		let mut operands = self.pop();
 		let n = match tree.label() {
-			NonTerm::N_Sum => operands.into_iter().sum(),
-			NonTerm::N_Fact => operands.into_iter().product(),
-			NonTerm::N_Term => {
+			NonTerm::Sum => operands.into_iter().sum(),
+			NonTerm::Fact => operands.into_iter().product(),
+			NonTerm::Term => {
 				assert_eq!(operands.len(), 1);
 				operands.pop().unwrap()
 			}
@@ -695,6 +707,7 @@ Try testing it out by running `cargo run` and seeing how it works!
 [wt]: https://en.wikipedia.org/wiki/Canonical_LR_parser#Constructing_LR(1)_parsing_tables
 [tp]: http://david.tribble.com/text/lrk_parsing.html
 [honalee]: http://david.tribble.com/text/honalee.html
+[rr]: https://doc.rust-lang.org/reference/identifiers.html
 [wr]: https://en.wikipedia.org/wiki/Recursive_ascent_parser
 [bs]: https://doc.rust-lang.org/cargo/reference/build-scripts.html
 [od]: https://doc.rust-lang.org/stable/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts
@@ -702,6 +715,7 @@ Try testing it out by running `cargo run` and seeing how it works!
 [cf]: https://en.wikipedia.org/wiki/Context-free_grammar
 [rw]: https://en.wikipedia.org/wiki/Rewrite_rule
 [term]: crate#terminal-and-non-terminal-symbols
+[ri]: https://doc.rust-lang.org/reference/identifiers.html#raw-identifiers
 [ps]: crate#parser-stucture
 [wl]: https://en.wikipedia.org/wiki/Lexer
 [`Tokens`]: lex::Tokens

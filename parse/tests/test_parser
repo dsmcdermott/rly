@@ -20,10 +20,10 @@ mod parser {
 
 	#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 	pub enum NonTerm {
-		N_Fact,
-		N_Start,
-		N_Sum,
-		N_Term,
+		r#Fact,
+		r#Start,
+		r#Sum,
+		r#Term,
 	}
 
 	mod display {
@@ -33,17 +33,17 @@ mod parser {
 		impl Display for NonTerm {
 			fn fmt(&self, f: &mut Formatter) -> Result {
 				let name = match self {
-					NonTerm::N_Fact => "Fact",
-					NonTerm::N_Start => "Start",
-					NonTerm::N_Sum => "Sum",
-					NonTerm::N_Term => "Term",
+					NonTerm::r#Fact => "Fact",
+					NonTerm::r#Start => "Start",
+					NonTerm::r#Sum => "Sum",
+					NonTerm::r#Term => "Term",
 				};
 				write!(f, "{}", name)
 			}
 		}
 	}
 
-	const START: NonTerm = NonTerm::N_Start;
+	const START: NonTerm = NonTerm::r#Start;
 
 	pub type Ast<'a> = ast::Ast<NonTerm, Token<'a>>;
 
@@ -110,45 +110,45 @@ mod parser {
 			//kernel:
 			//	[Start -> ·Sum, $]*
 			//closure:
-			//	[Fact -> ·Fact mult Term, plus]
-			//	[Term -> ·id, plus]
-			//	[Fact -> ·Term, $]
-			//	[Fact -> ·Fact mult Term, mult]
-			//	[Fact -> ·Term, mult]
-			//	[Fact -> ·Fact mult Term, $]
-			//	[Term -> ·id, mult]
-			//	[Sum -> ·Sum plus Fact, $]
-			//	[Sum -> ·Fact, plus]
-			//	[Sum -> ·Sum plus Fact, plus]
-			//	[Term -> ·lparen Sum rparen, plus]
-			//	[Term -> ·lparen Sum rparen, $]
-			//	[Term -> ·int, plus]
-			//	[Fact -> ·Term, plus]
-			//	[Term -> ·int, mult]
 			//	[Term -> ·lparen Sum rparen, mult]
-			//	[Term -> ·id, $]
-			//	[Term -> ·int, $]
+			//	[Sum -> ·Fact, plus]
+			//	[Fact -> ·Fact mult Term, plus]
 			//	[Sum -> ·Fact, $]
+			//	[Term -> ·int, $]
+			//	[Term -> ·int, plus]
+			//	[Term -> ·id, $]
+			//	[Fact -> ·Fact mult Term, $]
+			//	[Term -> ·lparen Sum rparen, $]
+			//	[Term -> ·id, plus]
+			//	[Sum -> ·Sum plus Fact, $]
+			//	[Fact -> ·Fact mult Term, mult]
+			//	[Sum -> ·Sum plus Fact, plus]
+			//	[Fact -> ·Term, $]
+			//	[Fact -> ·Term, mult]
+			//	[Term -> ·lparen Sum rparen, plus]
+			//	[Term -> ·int, mult]
+			//	[Fact -> ·Term, plus]
+			//	[Term -> ·id, mult]
 			//transitions:
-			//	lparen -> 4
+			//	lparen -> 6
+			//	int -> 3
 			//	Sum -> 2
-			//	int -> 5
-			//	Term -> 3
-			//	id -> 6
+			//	id -> 4
+			//	Term -> 5
 			//	Fact -> 1
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
-				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s5(AstNode::Leaf(la)) }
-				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s3(AstNode::Leaf(la)) }
+				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
 				let (s, n) = res;
 				if n == 0 {
 					res = match *s.label() {
-						NonTerm::N_Sum => self.s2(AstNode::Branch(s)),
-						NonTerm::N_Term => self.s3(AstNode::Branch(s)),
-						NonTerm::N_Fact => self.s1(AstNode::Branch(s)),
+						NonTerm::r#Sum => self.s2(AstNode::Branch(s)),
+						NonTerm::r#Term => self.s5(AstNode::Branch(s)),
+						NonTerm::r#Fact => self.s1(AstNode::Branch(s)),
 						START => return Ok(s),
 						_ => goto_err(),
 					}?;
@@ -161,18 +161,18 @@ mod parser {
 		fn s1(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//1.
 			//kernel:
-			//	[Fact -> Fact ·mult Term, $]*
-			//	[Sum -> Fact·, $]*
 			//	[Fact -> Fact ·mult Term, plus]*
-			//	[Sum -> Fact·, plus]*
+			//	[Sum -> Fact·, $]*
 			//	[Fact -> Fact ·mult Term, mult]*
+			//	[Sum -> Fact·, plus]*
+			//	[Fact -> Fact ·mult Term, $]*
 			//closure:
 			//transitions:
 			//	mult -> 7
 			let mut res: (Ast<'a>, usize) = match self.kind() {
 				Some(TokenKind::T_mult) => { let la = self.shift()?.unwrap(); self.s7(AstNode::Leaf(la)) }
-				None => return ret(NonTerm::N_Sum, val, 0),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Sum, val, 0),
+				None => return ret(NonTerm::r#Sum, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Sum, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -191,15 +191,15 @@ mod parser {
 		fn s2(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//2.
 			//kernel:
-			//	[Start -> Sum·, $]*
-			//	[Sum -> Sum ·plus Fact, $]*
 			//	[Sum -> Sum ·plus Fact, plus]*
+			//	[Sum -> Sum ·plus Fact, $]*
+			//	[Start -> Sum·, $]*
 			//closure:
 			//transitions:
 			//	plus -> 8
 			let mut res: (Ast<'a>, usize) = match self.kind() {
 				Some(TokenKind::T_plus) => { let la = self.shift()?.unwrap(); self.s8(AstNode::Leaf(la)) }
-				None => return ret(NonTerm::N_Start, val, 0),
+				None => return ret(NonTerm::r#Start, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -218,17 +218,17 @@ mod parser {
 		fn s3(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//3.
 			//kernel:
-			//	[Fact -> Term·, mult]*
-			//	[Fact -> Term·, plus]*
-			//	[Fact -> Term·, $]*
-			//	[Fact -> Term·, rparen]*
+			//	[Term -> int·, $]*
+			//	[Term -> int·, plus]*
+			//	[Term -> int·, rparen]*
+			//	[Term -> int·, mult]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Fact, val, 0),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Fact, val, 0),
-				None => return ret(NonTerm::N_Fact, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Fact, val, 0),
+				None => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Term, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -247,50 +247,23 @@ mod parser {
 		fn s4(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//4.
 			//kernel:
-			//	[Term -> lparen ·Sum rparen, rparen]*
-			//	[Term -> lparen ·Sum rparen, plus]*
-			//	[Term -> lparen ·Sum rparen, $]*
-			//	[Term -> lparen ·Sum rparen, mult]*
+			//	[Term -> id·, plus]*
+			//	[Term -> id·, mult]*
+			//	[Term -> id·, $]*
+			//	[Term -> id·, rparen]*
 			//closure:
-			//	[Fact -> ·Term, rparen]
-			//	[Fact -> ·Fact mult Term, plus]
-			//	[Term -> ·id, plus]
-			//	[Fact -> ·Fact mult Term, rparen]
-			//	[Sum -> ·Sum plus Fact, plus]
-			//	[Term -> ·lparen Sum rparen, plus]
-			//	[Sum -> ·Fact, plus]
-			//	[Sum -> ·Sum plus Fact, rparen]
-			//	[Term -> ·int, mult]
-			//	[Term -> ·int, rparen]
-			//	[Fact -> ·Term, plus]
-			//	[Fact -> ·Term, mult]
-			//	[Term -> ·id, rparen]
-			//	[Term -> ·id, mult]
-			//	[Term -> ·int, plus]
-			//	[Term -> ·lparen Sum rparen, mult]
-			//	[Sum -> ·Fact, rparen]
-			//	[Term -> ·lparen Sum rparen, rparen]
-			//	[Fact -> ·Fact mult Term, mult]
 			//transitions:
-			//	id -> 11
-			//	lparen -> 4
-			//	Fact -> 10
-			//	int -> 13
-			//	Term -> 9
-			//	Sum -> 12
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s11(AstNode::Leaf(la)) }
-				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
-				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s13(AstNode::Leaf(la)) }
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Term, val, 0),
+				None => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Term, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
 				let (mut s, n) = res;
 				if n == 0 {
 					res = match *s.label() {
-						NonTerm::N_Fact => self.s10(AstNode::Branch(s)),
-						NonTerm::N_Term => self.s9(AstNode::Branch(s)),
-						NonTerm::N_Sum => self.s12(AstNode::Branch(s)),
 						_ => goto_err(),
 					}?;
 				} else {
@@ -303,17 +276,17 @@ mod parser {
 		fn s5(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//5.
 			//kernel:
-			//	[Term -> int·, plus]*
-			//	[Term -> int·, mult]*
-			//	[Term -> int·, $]*
-			//	[Term -> int·, rparen]*
+			//	[Fact -> Term·, rparen]*
+			//	[Fact -> Term·, $]*
+			//	[Fact -> Term·, mult]*
+			//	[Fact -> Term·, plus]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Term, val, 0),
-				None => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Term, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Fact, val, 0),
+				None => return ret(NonTerm::r#Fact, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Fact, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Fact, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -332,23 +305,50 @@ mod parser {
 		fn s6(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//6.
 			//kernel:
-			//	[Term -> id·, $]*
-			//	[Term -> id·, mult]*
-			//	[Term -> id·, rparen]*
-			//	[Term -> id·, plus]*
+			//	[Term -> lparen ·Sum rparen, mult]*
+			//	[Term -> lparen ·Sum rparen, $]*
+			//	[Term -> lparen ·Sum rparen, plus]*
+			//	[Term -> lparen ·Sum rparen, rparen]*
 			//closure:
+			//	[Term -> ·id, plus]
+			//	[Term -> ·id, rparen]
+			//	[Term -> ·int, rparen]
+			//	[Term -> ·int, plus]
+			//	[Fact -> ·Fact mult Term, mult]
+			//	[Fact -> ·Term, plus]
+			//	[Term -> ·lparen Sum rparen, plus]
+			//	[Fact -> ·Term, mult]
+			//	[Term -> ·lparen Sum rparen, rparen]
+			//	[Sum -> ·Fact, rparen]
+			//	[Sum -> ·Sum plus Fact, plus]
+			//	[Sum -> ·Sum plus Fact, rparen]
+			//	[Fact -> ·Fact mult Term, rparen]
+			//	[Fact -> ·Term, rparen]
+			//	[Fact -> ·Fact mult Term, plus]
+			//	[Sum -> ·Fact, plus]
+			//	[Term -> ·id, mult]
+			//	[Term -> ·lparen Sum rparen, mult]
+			//	[Term -> ·int, mult]
 			//transitions:
+			//	Sum -> 9
+			//	lparen -> 6
+			//	id -> 11
+			//	Fact -> 12
+			//	Term -> 13
+			//	int -> 10
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				None => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Term, val, 0),
+				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s11(AstNode::Leaf(la)) }
+				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s10(AstNode::Leaf(la)) }
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
 				let (mut s, n) = res;
 				if n == 0 {
 					res = match *s.label() {
+						NonTerm::r#Sum => self.s9(AstNode::Branch(s)),
+						NonTerm::r#Fact => self.s12(AstNode::Branch(s)),
+						NonTerm::r#Term => self.s13(AstNode::Branch(s)),
 						_ => goto_err(),
 					}?;
 				} else {
@@ -362,38 +362,38 @@ mod parser {
 			//7.
 			//kernel:
 			//	[Fact -> Fact mult ·Term, $]*
-			//	[Fact -> Fact mult ·Term, rparen]*
 			//	[Fact -> Fact mult ·Term, mult]*
+			//	[Fact -> Fact mult ·Term, rparen]*
 			//	[Fact -> Fact mult ·Term, plus]*
 			//closure:
-			//	[Term -> ·id, rparen]
-			//	[Term -> ·int, rparen]
-			//	[Term -> ·lparen Sum rparen, rparen]
-			//	[Term -> ·int, $]
-			//	[Term -> ·id, mult]
 			//	[Term -> ·lparen Sum rparen, plus]
-			//	[Term -> ·id, plus]
-			//	[Term -> ·id, $]
+			//	[Term -> ·id, mult]
 			//	[Term -> ·lparen Sum rparen, mult]
-			//	[Term -> ·int, mult]
+			//	[Term -> ·id, $]
 			//	[Term -> ·lparen Sum rparen, $]
+			//	[Term -> ·int, rparen]
+			//	[Term -> ·int, $]
+			//	[Term -> ·id, rparen]
+			//	[Term -> ·lparen Sum rparen, rparen]
 			//	[Term -> ·int, plus]
+			//	[Term -> ·int, mult]
+			//	[Term -> ·id, plus]
 			//transitions:
-			//	int -> 5
-			//	lparen -> 4
-			//	id -> 6
+			//	int -> 3
+			//	id -> 4
 			//	Term -> 14
+			//	lparen -> 6
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s5(AstNode::Leaf(la)) }
-				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
-				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s3(AstNode::Leaf(la)) }
+				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
+				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
 				let (mut s, n) = res;
 				if n == 0 {
 					res = match *s.label() {
-						NonTerm::N_Term => self.s14(AstNode::Branch(s)),
+						NonTerm::r#Term => self.s14(AstNode::Branch(s)),
 						_ => goto_err(),
 					}?;
 				} else {
@@ -406,48 +406,48 @@ mod parser {
 		fn s8(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//8.
 			//kernel:
+			//	[Sum -> Sum plus ·Fact, rparen]*
 			//	[Sum -> Sum plus ·Fact, $]*
 			//	[Sum -> Sum plus ·Fact, plus]*
-			//	[Sum -> Sum plus ·Fact, rparen]*
 			//closure:
-			//	[Term -> ·int, $]
-			//	[Term -> ·id, plus]
-			//	[Term -> ·int, mult]
-			//	[Fact -> ·Fact mult Term, rparen]
-			//	[Term -> ·lparen Sum rparen, rparen]
-			//	[Fact -> ·Term, mult]
-			//	[Fact -> ·Term, $]
-			//	[Term -> ·id, $]
-			//	[Term -> ·lparen Sum rparen, mult]
-			//	[Term -> ·id, rparen]
-			//	[Term -> ·id, mult]
-			//	[Fact -> ·Fact mult Term, plus]
-			//	[Fact -> ·Fact mult Term, mult]
-			//	[Fact -> ·Fact mult Term, $]
-			//	[Term -> ·int, rparen]
-			//	[Fact -> ·Term, rparen]
-			//	[Term -> ·lparen Sum rparen, $]
-			//	[Term -> ·int, plus]
-			//	[Fact -> ·Term, plus]
 			//	[Term -> ·lparen Sum rparen, plus]
+			//	[Term -> ·lparen Sum rparen, mult]
+			//	[Fact -> ·Fact mult Term, plus]
+			//	[Fact -> ·Fact mult Term, $]
+			//	[Term -> ·id, plus]
+			//	[Term -> ·id, mult]
+			//	[Fact -> ·Fact mult Term, rparen]
+			//	[Fact -> ·Term, $]
+			//	[Term -> ·lparen Sum rparen, $]
+			//	[Term -> ·lparen Sum rparen, rparen]
+			//	[Fact -> ·Term, plus]
+			//	[Term -> ·id, rparen]
+			//	[Term -> ·int, rparen]
+			//	[Term -> ·id, $]
+			//	[Fact -> ·Term, mult]
+			//	[Fact -> ·Term, rparen]
+			//	[Term -> ·int, mult]
+			//	[Fact -> ·Fact mult Term, mult]
+			//	[Term -> ·int, plus]
+			//	[Term -> ·int, $]
 			//transitions:
-			//	int -> 5
+			//	id -> 4
 			//	Fact -> 15
-			//	lparen -> 4
-			//	id -> 6
-			//	Term -> 3
+			//	Term -> 5
+			//	lparen -> 6
+			//	int -> 3
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s5(AstNode::Leaf(la)) }
-				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
-				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_id) => { let la = self.shift()?.unwrap(); self.s4(AstNode::Leaf(la)) }
+				Some(TokenKind::T_lparen) => { let la = self.shift()?.unwrap(); self.s6(AstNode::Leaf(la)) }
+				Some(TokenKind::T_int) => { let la = self.shift()?.unwrap(); self.s3(AstNode::Leaf(la)) }
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
 				let (mut s, n) = res;
 				if n == 0 {
 					res = match *s.label() {
-						NonTerm::N_Fact => self.s15(AstNode::Branch(s)),
-						NonTerm::N_Term => self.s3(AstNode::Branch(s)),
+						NonTerm::r#Fact => self.s15(AstNode::Branch(s)),
+						NonTerm::r#Term => self.s5(AstNode::Branch(s)),
 						_ => goto_err(),
 					}?;
 				} else {
@@ -460,15 +460,19 @@ mod parser {
 		fn s9(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//9.
 			//kernel:
-			//	[Fact -> Term·, plus]*
-			//	[Fact -> Term·, mult]*
-			//	[Fact -> Term·, rparen]*
+			//	[Term -> lparen Sum ·rparen, plus]*
+			//	[Term -> lparen Sum ·rparen, $]*
+			//	[Term -> lparen Sum ·rparen, mult]*
+			//	[Term -> lparen Sum ·rparen, rparen]*
+			//	[Sum -> Sum ·plus Fact, plus]*
+			//	[Sum -> Sum ·plus Fact, rparen]*
 			//closure:
 			//transitions:
+			//	plus -> 8
+			//	rparen -> 16
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Fact, val, 0),
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Fact, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Fact, val, 0),
+				Some(TokenKind::T_plus) => { let la = self.shift()?.unwrap(); self.s8(AstNode::Leaf(la)) }
+				Some(TokenKind::T_rparen) => { let la = self.shift()?.unwrap(); self.s16(AstNode::Leaf(la)) }
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -487,18 +491,15 @@ mod parser {
 		fn s10(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//10.
 			//kernel:
-			//	[Fact -> Fact ·mult Term, rparen]*
-			//	[Sum -> Fact·, rparen]*
-			//	[Sum -> Fact·, plus]*
-			//	[Fact -> Fact ·mult Term, plus]*
-			//	[Fact -> Fact ·mult Term, mult]*
+			//	[Term -> int·, mult]*
+			//	[Term -> int·, rparen]*
+			//	[Term -> int·, plus]*
 			//closure:
 			//transitions:
-			//	mult -> 7
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_mult) => { let la = self.shift()?.unwrap(); self.s7(AstNode::Leaf(la)) }
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Sum, val, 0),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Sum, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Term, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -517,15 +518,15 @@ mod parser {
 		fn s11(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//11.
 			//kernel:
-			//	[Term -> id·, plus]*
-			//	[Term -> id·, rparen]*
 			//	[Term -> id·, mult]*
+			//	[Term -> id·, rparen]*
+			//	[Term -> id·, plus]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Term, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Term, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Term, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -544,19 +545,18 @@ mod parser {
 		fn s12(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//12.
 			//kernel:
-			//	[Term -> lparen Sum ·rparen, plus]*
-			//	[Term -> lparen Sum ·rparen, mult]*
-			//	[Sum -> Sum ·plus Fact, plus]*
-			//	[Term -> lparen Sum ·rparen, rparen]*
-			//	[Sum -> Sum ·plus Fact, rparen]*
-			//	[Term -> lparen Sum ·rparen, $]*
+			//	[Fact -> Fact ·mult Term, rparen]*
+			//	[Fact -> Fact ·mult Term, plus]*
+			//	[Sum -> Fact·, plus]*
+			//	[Sum -> Fact·, rparen]*
+			//	[Fact -> Fact ·mult Term, mult]*
 			//closure:
 			//transitions:
-			//	rparen -> 16
-			//	plus -> 8
+			//	mult -> 7
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_rparen) => { let la = self.shift()?.unwrap(); self.s16(AstNode::Leaf(la)) }
-				Some(TokenKind::T_plus) => { let la = self.shift()?.unwrap(); self.s8(AstNode::Leaf(la)) }
+				Some(TokenKind::T_mult) => { let la = self.shift()?.unwrap(); self.s7(AstNode::Leaf(la)) }
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Sum, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Sum, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -575,15 +575,15 @@ mod parser {
 		fn s13(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//13.
 			//kernel:
-			//	[Term -> int·, mult]*
-			//	[Term -> int·, rparen]*
-			//	[Term -> int·, plus]*
+			//	[Fact -> Term·, plus]*
+			//	[Fact -> Term·, rparen]*
+			//	[Fact -> Term·, mult]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Term, val, 0),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Term, val, 0),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Fact, val, 0),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Fact, val, 0),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Fact, val, 0),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -603,16 +603,16 @@ mod parser {
 			//14.
 			//kernel:
 			//	[Fact -> Fact mult Term·, mult]*
-			//	[Fact -> Fact mult Term·, plus]*
 			//	[Fact -> Fact mult Term·, rparen]*
 			//	[Fact -> Fact mult Term·, $]*
+			//	[Fact -> Fact mult Term·, plus]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Fact, val, 2),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Fact, val, 2),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Fact, val, 2),
-				None => return ret(NonTerm::N_Fact, val, 2),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Fact, val, 2),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Fact, val, 2),
+				None => return ret(NonTerm::r#Fact, val, 2),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Fact, val, 2),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -631,21 +631,21 @@ mod parser {
 		fn s15(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//15.
 			//kernel:
+			//	[Fact -> Fact ·mult Term, $]*
+			//	[Sum -> Sum plus Fact·, rparen]*
+			//	[Fact -> Fact ·mult Term, mult]*
+			//	[Fact -> Fact ·mult Term, rparen]*
 			//	[Sum -> Sum plus Fact·, plus]*
 			//	[Sum -> Sum plus Fact·, $]*
 			//	[Fact -> Fact ·mult Term, plus]*
-			//	[Fact -> Fact ·mult Term, mult]*
-			//	[Sum -> Sum plus Fact·, rparen]*
-			//	[Fact -> Fact ·mult Term, rparen]*
-			//	[Fact -> Fact ·mult Term, $]*
 			//closure:
 			//transitions:
 			//	mult -> 7
 			let mut res: (Ast<'a>, usize) = match self.kind() {
 				Some(TokenKind::T_mult) => { let la = self.shift()?.unwrap(); self.s7(AstNode::Leaf(la)) }
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Sum, val, 2),
-				None => return ret(NonTerm::N_Sum, val, 2),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Sum, val, 2),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Sum, val, 2),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Sum, val, 2),
+				None => return ret(NonTerm::r#Sum, val, 2),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
@@ -664,17 +664,17 @@ mod parser {
 		fn s16(&mut self, val: AstNode<NonTerm, Token<'a>>) -> Res<'a> {
 			//16.
 			//kernel:
-			//	[Term -> lparen Sum rparen·, $]*
-			//	[Term -> lparen Sum rparen·, plus]*
-			//	[Term -> lparen Sum rparen·, rparen]*
 			//	[Term -> lparen Sum rparen·, mult]*
+			//	[Term -> lparen Sum rparen·, plus]*
+			//	[Term -> lparen Sum rparen·, $]*
+			//	[Term -> lparen Sum rparen·, rparen]*
 			//closure:
 			//transitions:
 			let mut res: (Ast<'a>, usize) = match self.kind() {
-				None => return ret(NonTerm::N_Term, val, 2),
-				Some(TokenKind::T_plus) => return ret(NonTerm::N_Term, val, 2),
-				Some(TokenKind::T_rparen) => return ret(NonTerm::N_Term, val, 2),
-				Some(TokenKind::T_mult) => return ret(NonTerm::N_Term, val, 2),
+				Some(TokenKind::T_mult) => return ret(NonTerm::r#Term, val, 2),
+				Some(TokenKind::T_plus) => return ret(NonTerm::r#Term, val, 2),
+				None => return ret(NonTerm::r#Term, val, 2),
+				Some(TokenKind::T_rparen) => return ret(NonTerm::r#Term, val, 2),
 				_ => Err(Error::from(self.err())),
 			}?;
 			loop {
