@@ -69,10 +69,8 @@ continue parsing in order to search for further errors.
 
 ## Interface Changes
 
-- [ ] Change how the variants on the generated types `TokenKind` and `NonTerm` are
+- [x] Change how the variants on the generated types `TokenKind` and `NonTerm` are
 named: From `T_<name>` and `N_<name>`, respectively, to using raw identifiers.
-
-(Completed for `NonTerm`, not for `TokenKind`.)
 
 - [ ] Review the internal types used for parser generation and see if any should be
 made public.
