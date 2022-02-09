@@ -271,8 +271,8 @@ of rules to use when lexing. Rules are seperated by newlines ('\n' `U+000A`) and
 lines are ignored. The general syntax for a rule is as follows:
 
 ``` text
-rule ::= name | divider | regex		(no newlines)
-name ::= [[:alpha:]][_0-9[:alpha:]]*
+rule ::= name | divider | regex			(no newlines)
+name ::= [[:alpha:]][_0-9[:alpha:]]*	(except 'crate', 'self', 'super', and 'Self')
 divider ::= [[:space:]]:[[:space:]]
 regex ::= ".+"
 ```
@@ -294,6 +294,11 @@ f_0O : "(?P<interpunct>\u00B7)(?P<word>\w+)"
 
 trailing_whitespace : "((?m)\s+$)"
 ```
+
+The only exceptions to this are the terms "`crate`", "`self`", "`super`", and
+"`Self`", which cannot be used as `name`'s. This is due to restrictions rust places on
+its own identifiers and how the generated [lexers](crate#lexer-structure) are
+implemented.
 
 A `divider` is the character '`:`' (`U+003A`) with at least one (non-newline)
 whitespace character between it and the `name`, and between it and the `regex`

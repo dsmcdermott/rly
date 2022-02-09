@@ -43,6 +43,7 @@ fn scan(src: &str) -> Result<Vec<TokenRule>, LexerError> {
 	let name = Regex::new("^[[:space:]]*([[:alpha:]][0-9_[:alpha:]]*)").unwrap();
 	let div = Regex::new("^[[:space:]]+:[[:space:]]+").unwrap();
 	let regx = Regex::new("^\"(.*)\"[[:space:]]*$").unwrap();
+	let reserved = Regex::new("^(crate)|(self)|(super)|(Self)$").unwrap();
 	let mut lines = Vec::new();
 	for (n, s) in src.lines().enumerate() {
 		if ignore.is_match(s) {
@@ -54,6 +55,9 @@ fn scan(src: &str) -> Result<Vec<TokenRule>, LexerError> {
 			.captures(s)
 			.ok_or_else(|| err("missing or improperly formatted name for token rule"))?;
 		let rule_name = name_match.get(1).unwrap().as_str();
+		if reserved.is_match(rule_name) {
+			return Err(err("invalid name used"));
+		};
 		let mut rest_of_line = &s[name_match.get(0).unwrap().end()..];
 		rest_of_line = &rest_of_line[div
 			.find(rest_of_line)

@@ -278,8 +278,8 @@
 //! lines are ignored. The general syntax for a rule is as follows:
 //!
 //! ``` text
-//! rule ::= name | divider | regex		(no newlines)
-//! name ::= [[:alpha:]][_0-9[:alpha:]]*
+//! rule ::= name | divider | regex			(no newlines)
+//! name ::= [[:alpha:]][_0-9[:alpha:]]*	(except 'crate', 'self', 'super', and 'Self')
 //! divider ::= [[:space:]]:[[:space:]]
 //! regex ::= ".+"
 //! ```
@@ -301,6 +301,11 @@
 //!
 //! trailing_whitespace : "((?m)\s+$)"
 //! ```
+//!
+//! The only exceptions to this are the terms "`crate`", "`self`", "`super`", and
+//! "`Self`", which cannot be used as `name`'s. This is due to restrictions rust places on
+//! its own identifiers and how the generated [lexers](crate#lexer-structure) are
+//! implemented.
 //!
 //! A `divider` is the character '`:`' (`U+003A`) with at least one (non-newline)
 //! whitespace character between it and the `name`, and between it and the `regex`
@@ -765,6 +770,7 @@ fn scan(src: &str) -> Result<Vec<TokenRule>, LexerError> {
 	let name = Regex::new("^[[:space:]]*([[:alpha:]][0-9_[:alpha:]]*)").unwrap();
 	let div = Regex::new("^[[:space:]]+:[[:space:]]+").unwrap();
 	let regx = Regex::new("^\"(.*)\"[[:space:]]*$").unwrap();
+	let reserved = Regex::new("^(crate)|(self)|(super)|(Self)$").unwrap();
 	let mut lines = Vec::new();
 	for (n, s) in src.lines().enumerate() {
 		if ignore.is_match(s) {
@@ -776,6 +782,9 @@ fn scan(src: &str) -> Result<Vec<TokenRule>, LexerError> {
 			.captures(s)
 			.ok_or_else(|| err("missing or improperly formatted name for token rule"))?;
 		let rule_name = name_match.get(1).unwrap().as_str();
+		if reserved.is_match(rule_name) {
+			return Err(err("invalid name used"));
+		};
 		let mut rest_of_line = &s[name_match.get(0).unwrap().end()..];
 		rest_of_line = &rest_of_line[div
 			.find(rest_of_line)
