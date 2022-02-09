@@ -525,7 +525,7 @@ where
 		Ok(for (term, goto) in self.1.iter().copied() {
 			write!(
 				f,
-				"Some(TokenKind::T_{term}) => {{ let la = self.shift()?.unwrap(); self.s{goto}(AstNode::Leaf(la)) }}\n\t\t\t\t",
+				"Some(TokenKind::r#{term}) => {{ let la = self.shift()?.unwrap(); self.s{goto}(AstNode::Leaf(la)) }}\n\t\t\t\t",
 				term = self.0.term(term),
 				goto = goto
 			)?;
@@ -558,7 +558,7 @@ where
 				write(format_args!("None"), lhs, n)?;
 			} else {
 				write(
-					format_args!("Some(TokenKind::T_{})", self.0.map().term(*la)),
+					format_args!("Some(TokenKind::r#{})", self.0.map().term(*la)),
 					lhs,
 					n,
 				)?;

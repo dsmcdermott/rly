@@ -31,12 +31,12 @@ mod lexer {
 
 	#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 	pub enum TokenKind {
-		T_plus,
-		T_mult,
-		T_int,
-		T_id,
-		T_lparen,
-		T_rparen,
+		r#plus,
+		r#mult,
+		r#int,
+		r#id,
+		r#lparen,
+		r#rparen,
 	}
 
 	mod display {
@@ -46,18 +46,18 @@ mod lexer {
 		impl Display for TokenKind {
 			fn fmt(&self, f: &mut Formatter<'_>) -> Result {
 				match self {
-					TokenKind::T_plus => write!(f, "plus"),
-					TokenKind::T_mult => write!(f, "mult"),
-					TokenKind::T_int => write!(f, "int"),
-					TokenKind::T_id => write!(f, "id"),
-					TokenKind::T_lparen => write!(f, "lparen"),
-					TokenKind::T_rparen => write!(f, "rparen"),
+					TokenKind::r#plus => write!(f, "plus"),
+					TokenKind::r#mult => write!(f, "mult"),
+					TokenKind::r#int => write!(f, "int"),
+					TokenKind::r#id => write!(f, "id"),
+					TokenKind::r#lparen => write!(f, "lparen"),
+					TokenKind::r#rparen => write!(f, "rparen"),
 				}
 			}
 		}
 	}
 
-	const KIND_ARRAY: [Option<TokenKind>; 7] = [ Some(TokenKind::T_plus), Some(TokenKind::T_mult), Some(TokenKind::T_int), Some(TokenKind::T_id), Some(TokenKind::T_lparen), Some(TokenKind::T_rparen), None, ];
+	const KIND_ARRAY: [Option<TokenKind>; 7] = [ Some(TokenKind::r#plus), Some(TokenKind::r#mult), Some(TokenKind::r#int), Some(TokenKind::r#id), Some(TokenKind::r#lparen), Some(TokenKind::r#rparen), None, ];
 
 	pub type Token<'a> = lex::Token<'a, TokenKind>;
 

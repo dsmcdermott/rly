@@ -365,8 +365,8 @@ well.
 
 The only assumption made by a [parser module][ps] about its environment, aside from
 having this crate available, is that there is a sister module called `lexer`,
-containing an enumeration called `TokenKind`, whose variants are `T_<sym>` for each
-terminal symbol `<sym>` of the language.
+containing an enumeration called `TokenKind`, whose variants are `TokenKind::<sym>`
+for each terminal symbol `<sym>` of the language.
 
 `TokenKind` is imported into the module and used as the type discriminant for
 [`Token`]'s, (as returned by [`Token::kind`](lex::Token::kind).)
@@ -672,7 +672,7 @@ impl<'a, 's> Walker<'a, NonTerm, Token<'s>, ()> for Calculator {
 
 	// if leaf is an 'int', parses the underlying str as a u32 and pushes it
 	fn on_leaf(&mut self, leaf: &'a Token<'s>) -> Option<()> {
-		if *leaf.kind() != TokenKind::T_int {
+		if *leaf.kind() != TokenKind::int {
 			return None;
 		};
 		let n = leaf.val().parse().unwrap();
