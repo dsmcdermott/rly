@@ -26,10 +26,15 @@ examples.
 
 ## Parser Specification Language
 
-- [ ] Eliminate the need for `start` and `eof` to be reserved words: Change the parser
+- [ ] ~~Eliminate the need for `start` and `eof` to be reserved words: Change the parser
 generation process to no longer assume that the strings "`start`" and "`eof`" are
-available without conflicts with the original specification, and change the
-specification format to include a way of explicitly declaring a starting symbol.
+available without conflicts with the original specification, and change the specification
+format to include a way of explicitly declaring a starting symbol.~~
+
+- [x] `eof` is no longer reserved. `start` however has been changed to `Start` and is
+still reserved, which is how I intend to keep it for now. `crate`, `self`, `super`, and
+`Self` have been added as reserved words, in line with the new use of raw identifiers for
+variant names.
 
 ## Testing
 
@@ -66,6 +71,8 @@ continue parsing in order to search for further errors.
 
 - [ ] Change how the variants on the generated types `TokenKind` and `NonTerm` are
 named: From `T_<name>` and `N_<name>`, respectively, to using raw identifiers.
+
+(Completed for `NonTerm`, not for `TokenKind`.)
 
 - [ ] Review the internal types used for parser generation and see if any should be
 made public.
