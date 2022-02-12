@@ -7,8 +7,6 @@ use std::io::Error as IOError;
 
 #[derive(Debug)]
 /// A type for syntax errors in Lexer definitions.
-//
-// `val` is an errormessage indicating the nature of the error, and `line` indicates which line of the source the error occured on.
 pub struct FmtError {
 	val: String,
 }
@@ -25,13 +23,7 @@ impl Display for FmtError {
 	}
 }
 
-//impl Display for FmtError {
-//	fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-//		write!(f, "Invalid lexer syntax on line {}: {}", self.line, &self.val)
-//	}
-//}
-//
-//impl error::Error for FmtError {}
+impl error::Error for FmtError {}
 
 /// The different kinds of [`LexerError`]'s.
 #[derive(Debug)]
@@ -61,7 +53,6 @@ pub enum LexerErrorKind {
 /// Its methods can be used to determine the [kind](LexerErrorKind) of error, which line
 /// number it occured on, and what the contents of that line were.
 
-//pub struct Error(ErrorKind);
 pub struct LexerError {
 	kind: LexerErrorKind,
 	lineno: usize,

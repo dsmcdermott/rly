@@ -88,6 +88,9 @@
 //! a reference to the branch node as a whole, while the other two traits only act on the
 //! [`label`] of the branch being exited.
 //
+//  TODO: Add a summary of the iterator types for Ast, and show how they can be
+//  implemented using the walking tools introduced above.
+//
 //  # Iterating Over an `Ast`
 //
 //!

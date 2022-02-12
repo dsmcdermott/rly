@@ -376,56 +376,6 @@ pub fn build_lexer() -> Result<(), LexerBuilderError> {
 /// }
 /// ```
 
-//	# Example
-//
-//	In `build.rs`
-//
-//	``` no_run
-//	use lex::{LexerBuilder, LexerBuilderError};
-//
-//	fn main() -> Result<(), LexerBuilderError> {
-//
-//		lex::build_lexer()?										// Builds a lexer with default values.
-//
-//		let mut alt_builder = LexerBuilder::new().unwrap();
-//		alt_builder.with_name("alt_lexer").unwrap().build()?;	// Builds an alternative lexer with the name 'alt_lexer'.
-//		Ok(())
-//	}
-//	```
-//
-//	In `src/main.rs`
-//
-//	``` ignore
-//	use std::{
-//		env,
-//		fs::File,
-//		ffi::OsString,
-//		io::Read};
-//
-//	use lex::{self, Lexer};
-//
-//	lex::lexer!();
-//
-//	mod alt_lexer {
-//		lex::lexer!("alt_lexer");
-//		pub use lexer::*;
-//	}
-//
-//	fn process_arg(arg: OsString) {
-//		let mut src = String::new();
-//
-//		File::open(arg)
-//			.and_then(|file| file.read_to_string(&mut src))
-//			.expect("unable to open file");
-//
-//		let mut tokens = Vec::new();
-//
-//		let lexer =
-//
-//		for token in lexer::LexerRules::new
-//
-//	fn main() {
-
 #[macro_export]
 macro_rules! lexer {
 	() => {

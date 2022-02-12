@@ -132,61 +132,6 @@ impl<N: Prim, T: Prim> GrammarRules<N, T> {
 	}
 }
 
-//#[cfg(test)]
-//mod iter_items {
-//	use std::{
-//		collections::hash_map::{Keys, HashMap},
-//		slice::Iter,
-//		ops::Deref,
-//	};
-//	use super::{
-//		Symbol,
-//		GrammarRules,
-//		Prim,
-//	};
-//	use crate::grammar_rule_structures::BasicItem;
-//
-//	type Val<N, T> = Box<[Symbol<N, T>]>;
-//	type Vals<N, T> = Vec<Val<N, T>>;
-//
-//	pub struct BasicItems<'a, N: Prim, T: Prim> {
-//		rules: &'a HashMap<N, Vals<N, T>>,
-//		keys: Keys<'a, N, Vals<N, T>>,
-//		current: &'a N,
-//		iter: Iter<'a, Val<N, T>>,
-//	}
-//
-//	impl<'a, N: Prim, T: Prim> BasicItems<'a, N, T> {
-//
-//		//	Will panic if the rules are empty
-//		pub(super) fn new(rules: &'a GrammarRules<N, T>) -> Self {
-//			let rules = &rules.rules;
-//			let mut keys = rules.keys();
-//			let current = keys.next().unwrap();
-//			let iter = rules.get(current).unwrap().iter();
-//			Self { rules, keys, current, iter }
-//		}
-//	}
-//
-//	impl<'a, N: Prim, T: Prim> Iterator for BasicItems<'a, N, T> {
-//		type Item = BasicItem<'a, N, T>;
-//
-//		fn next(&mut self) -> Option<Self::Item> {
-//			match self.iter.next() {
-//				Some(rhs) => Some(BasicItem::new(*self.current, rhs.deref())),
-//				None => {
-//					self.current = self.keys.next()?;
-//					self.iter = self.rules.get(self.current).unwrap().iter();
-//					self.next()
-//				},
-//			}
-//		}
-//	}
-//}
-
-//#[cfg(test)]
-//pub use iter_items::BasicItems;
-
 #[cfg(test)]
 pub mod tests {
 

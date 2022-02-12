@@ -10,7 +10,7 @@
 //
 // START and EOF are special identifiers. There must be exactly one rule with START as the
 // left-hand-side and START cannot appear on the right-hand-side of any rules. EOF is
-// reserved and cannot be used (EOF is now '$', which is an invalid name anyway.)
+// reserved and cannot be used (EOF is currently '$', which is an invalid name anyway.)
 use crate::START;
 
 use std::{boxed::Box, collections::HashMap};
@@ -375,18 +375,6 @@ impl<'a> Scanner<'a> {
 		Self::new(inp).make_rules()
 	}
 }
-
-//fn find_line(inp: &str, pos: usize) -> usize {
-//	assert!(pos <= inp.len());
-//	let mut count = 0;
-//	for (num, line) in inp.split('\n').enumerate() {
-//		count += line.len() + 1;
-//		if pos <= count {
-//			return num;
-//		};
-//	};
-//	unreachable!();
-//}
 
 #[cfg(test)]
 mod tests {
