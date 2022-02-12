@@ -19,10 +19,9 @@ use std::{
 };
 
 use crate::{
-	EOF,
-	START,
 	grammar_rule_structures::{Prim, Symbol},
 	scanning::RuleMap,
+	EOF, START,
 };
 
 /// A trait for [discriminant types].
@@ -73,7 +72,7 @@ pub trait Discriminant {
 	/// assert!(matches!(some, Some(255)));
 	/// ```
 	///
-	/// See also the [requirements](Discriminant) for a type that implements both 
+	/// See also the [requirements](Discriminant) for a type that implements both
 	/// [`Discriminant`] and [`Eq`].
 	fn try_from(n: usize) -> Option<Self>
 	where
@@ -108,7 +107,7 @@ pub trait Discriminant {
 	/// assert!(matches!(result, Some(_)));
 	/// ```
 	///
-	/// See also the [requirements](Discriminant) for a type that implements both 
+	/// See also the [requirements](Discriminant) for a type that implements both
 	/// [`Discriminant`] and [`Eq`].
 	fn try_into(self) -> Option<usize>
 	where

@@ -163,8 +163,19 @@ mod error {
 				InvalidIdent(data) => write(f, "Not a valid identifier.", data),
 				MissingDiv(data) => write(f, "Missing '->'", data),
 				MissingTerm(data) => write(f, "Missing closing ';'", data),
-				DuplicateStart(data) => write(f, format_args!("Only one rule for '{}' allowed", START), data),
-				StartRHS(data) => write(f, format_args!("'{}' cannot be used on the right-hand side of a rule", START), data),
+				DuplicateStart(data) => write(
+					f,
+					format_args!("Only one rule for '{}' allowed", START),
+					data,
+				),
+				StartRHS(data) => write(
+					f,
+					format_args!(
+						"'{}' cannot be used on the right-hand side of a rule",
+						START
+					),
+					data,
+				),
 				EmptyRHS(data) => write(f, "Rules cannot have an empty right-hand side", data),
 				NoStart => wnd(format_args!("Must have a rule for '{}'", START), f),
 				EmptyInput => wnd("Input is empty", f),
@@ -239,7 +250,7 @@ impl<'a> Scanner<'a> {
 
 	fn find_name(&self) -> Result<Match<'a>> {
 		match self.find(self.name()) {
-			Some(rmatch)  => Ok(rmatch),
+			Some(rmatch) => Ok(rmatch),
 			None => Err(self.err(SrcError::InvalidIdent)),
 		}
 	}

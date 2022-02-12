@@ -10,14 +10,13 @@
 // implement Display by writing out their data as the correctly formatted components.
 
 use crate::{
-	START,
-	EOF,
 	error::ParserError,
 	grammar_rule_structures::Prim,
 	grammar_rules::GrammarRules,
 	scanning::{Scanner, SrcError},
 	sym_map::{Discriminant, InvalidDiscriminant, SymMap},
 	table_construction::Table,
+	EOF, START,
 };
 use std::{
 	collections::HashMap,
