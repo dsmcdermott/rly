@@ -131,18 +131,13 @@
 //!
 //! These lexers are written as module named `lexer` containing 4 public items. These are:
 //!
-//! * An enum called `TokenKind`, whose variants are constants of the form
-//! `<name>`[^var_name] for each [token rule](crate#rules) except for [`ignore` and
-//! `error`][ei] (if present,) and acts as the discriminant for [`Token`]'s returned by
-//! the lexer. `TokenKind` implements [`Debug`](std::fmt::Debug), [`Clone`], [`Copy`],
-//! [`PartialEq`], [`Eq`], [`PartialOrd`], [`Ord`], and [`Hash`](std::hash::Hash). It also
-//! implements [`Display`](std::fmt::Display), with the displayed value for a variant
-//! being "`<name>`".
-//!
-//! [^var_name]: Yes, I know that this is not standard naming for `enum` variants, and
-//! yes, the `#[allow(nonstandard_style)]` flag is set for the whole module (and not just
-//! because of the `TokenKind` variants), so you don't have to worry about compiler
-//! warnings when including it in your code.
+//! * An enum called `TokenKind`, whose variants are constants of the form `<name>` for
+//! each [token rule](crate#rules) except for [`ignore` and `error`][ei] (if present,) and
+//! acts as the discriminant for [`Token`]'s returned by the lexer. `TokenKind` implements
+//! [`Debug`](std::fmt::Debug), [`Clone`], [`Copy`], [`PartialEq`], [`Eq`],
+//! [`PartialOrd`], [`Ord`], and [`Hash`](std::hash::Hash). It also implements
+//! [`Display`](std::fmt::Display), with the displayed value for a variant being
+//! "`<name>`".
 //!
 //! * A type alias `Token<'a>` which is an alias for [`Token<'a, TokenKind>`], the type of
 //! tokens parsed by the lexer. [See there] for more details.

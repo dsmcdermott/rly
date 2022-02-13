@@ -443,24 +443,6 @@ impl<'a, 'b, N: Prim + Discriminant, T: Prim + Discriminant> ParserSpec<'a, 'b, 
 	}
 }
 
-pub fn write_from_rules<'a, 'b, N, T, W>(rules: &'b Rules<'a, N, T>, fout: W) -> io::Result<()>
-where
-	N: Prim + Discriminant,
-	T: Prim + Discriminant,
-	W: Write,
-{
-	ParserSpec::new(rules).write(fout)
-}
-
-pub fn write_from_rule_map<'a, N, T, W>(map: &HashMap<&'a str, Vec<Box<[&'a str]>>>, fout: W) -> io::Result<()>
-where
-	N: Prim + Discriminant,
-	T: Prim + Discriminant,
-	W: Write,
-{
-	Rules::<'a, N, T>::from_rule_map(map).gen_spec().write(fout)
-}
-
 /// Parses the grammar specification in `src` and writes a parser module to `fout`.
 ///
 /// This is equivalent to [`Rules::new(src)`](Rules::new) followed by
