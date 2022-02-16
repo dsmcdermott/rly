@@ -9,6 +9,3 @@ edition = "2021"
 lex = { path = "../lex" }
 rly_common = { path = "../rly_common" }
 regex = "1.5.4"
-
-[build-dependencies]
-rly_common = { path = "../rly_common" }

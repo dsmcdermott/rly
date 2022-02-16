@@ -11,6 +11,3 @@ rly_common = { path = "../rly_common" }
 
 [dev-dependencies]
 diff = "0.1.12"
-
-[build-dependencies]
-rly_common = { path = "../rly_common" }

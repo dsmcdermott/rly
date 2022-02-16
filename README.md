@@ -81,12 +81,6 @@ additionally rely on reexports in `parse` of certain traits and types from `lex`
 `rly_common` contains code that is used in both `parse` and `lex` and is used internally
 by those crates.
 
-For both `lex` and `parse`, the top-level documentation and the code for their `lib.rs`
-files are split into seperate files (`lexer_doc.md` and `parser_doc.md` and
-`lib_content.rs` respectively) to make editing the documentation more convenient. These
-crates use `rly_common` as a build dependency to combine the documentation in the markdown
-file with the code in the content file to generate the `lib.rs` file.
-
 # Building the Package
 
 Once the repository has been cloned, all you need to do to build it is run `cargo build`
