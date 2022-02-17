@@ -50,7 +50,7 @@ const ENDING: &'static str = "lex";
 ///
 /// The value for `location` must be an existing file ending with "`.lex`". If `location`
 /// is not set then it defaults to `name` with "`.lex`" added to the end (if `name` and
-/// `location` are not set, `name` default to the package name plus "`_lex`", so `location
+/// `location` are not set, `name` default to the package name plus "`_lex`", so `location`
 /// would default to "`[package name]_lex.lex`".)
 ///
 /// # Environment
