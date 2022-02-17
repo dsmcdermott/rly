@@ -50,7 +50,7 @@ const ENDING: &'static str = "lex";
 ///
 /// The value for `location` must be an existing file ending with "`.lex`". If `location`
 /// is not set then it defaults to `name` with "`.lex`" added to the end (if `name` and
-/// `location` are not set, `name` default to the package name plus "`_lex`", so `location
+/// `location` are not set, `name` default to the package name plus "`_lex`", so `location`
 /// would default to "`[package name]_lex.lex`".)
 ///
 /// # Environment
@@ -118,7 +118,7 @@ impl LexerBuilder {
 	/// Attempts to set the name for `self` to `name`.
 	///
 	/// If `name` is a valid filename (see [here](LexerBuilder#name-and-location),) then
-	/// this method returns a mutable reference to `self`, otherwise it returns an
+	/// this method returns a mutable reference to `self`, otherwise it returns a
 	/// [`LexerBuilderError`].
 	///
 	/// # Example
@@ -146,7 +146,7 @@ impl LexerBuilder {
 	///
 	/// If `location` is a valid path to a source file (see
 	/// [here](LexerBuilder#name-and-location),) then this method returns a mutable
-	/// reference to `self`, otherwise it returns an [`LexerBuilderError`].
+	/// reference to `self`, otherwise it returns a [`LexerBuilderError`].
 	///
 	/// # Example
 	/// ```no_run
