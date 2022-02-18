@@ -1,0 +1,17 @@
+[package]
+name = "lex-tests"
+version = "0.1.0"
+edition = "2021"
+autobins = false
+autoexamples = false
+autobenches = false
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+lex = { path = "../" }
+
+[dev-dependencies]
+lex = { path = "../" }
+diff = "0.1.12"

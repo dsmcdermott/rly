@@ -1,6 +1,7 @@
 [workspace]
 members = [
 	'lex',
+	'lex/lex-tests',
 	'parse',
 	'rly_common',
 ]
