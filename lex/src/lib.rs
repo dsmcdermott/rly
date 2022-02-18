@@ -48,50 +48,49 @@ fn scan(src: &str) -> Result<Vec<TokenRule>, LexerError> {
 	let reserved = Regex::new("^(crate)|(self)|(super)|(Self)$").unwrap();
 	let mut lines = Vec::new();
 	for (n, s) in src.lines().enumerate() {
-		if ignore.is_match(s) {
-			continue;
-		};
-		// TODO: make better error messages
-		let err = |val| LexerError::fmt::<&str, &str>(val, n, s);
-		let name_match = name
-			.captures(s)
-			.ok_or_else(|| err("missing or improperly formatted name for token rule"))?;
-		let rule_name = name_match.get(1).unwrap().as_str();
-		if reserved.is_match(rule_name) {
-			return Err(err("invalid name used"));
-		};
-		let mut rest_of_line = &s[name_match.get(0).unwrap().end()..];
-		rest_of_line = &rest_of_line[div
-			.find(rest_of_line)
-			.ok_or_else(|| err("missing divider \":\" between name and regex"))?
-			.end()..];
-		let regx_val = regx
-			.captures(rest_of_line)
-			.ok_or_else(|| err("missing or improperly delimited regex"))?
-			.get(1)
-			.unwrap()
-			.as_str();
-		match Regex::new(regx_val) {
-			Ok(comp_regx) => {
-				if comp_regx.is_match("") {
-					return Err(LexerError::empty(rule_name, regx_val, n, s));
+		if !ignore.is_match(s) {
+			// TODO: make better error messages
+			let err = |val| LexerError::fmt::<&str, &str>(val, n, s);
+			let name_match = name
+				.captures(s)
+				.ok_or_else(|| err("missing or improperly formatted name for token rule"))?;
+			let rule_name = name_match.get(1).unwrap().as_str();
+			if reserved.is_match(rule_name) {
+				return Err(err("invalid name used"));
+			};
+			let mut rest_of_line = &s[name_match.get(0).unwrap().end()..];
+			rest_of_line = &rest_of_line[div
+				.find(rest_of_line)
+				.ok_or_else(|| err("missing divider \":\" between name and regex"))?
+				.end()..];
+			let regx_val = regx
+				.captures(rest_of_line)
+				.ok_or_else(|| err("missing or improperly delimited regex"))?
+				.get(1)
+				.unwrap()
+				.as_str();
+			match Regex::new(regx_val) {
+				Ok(comp_regx) => {
+					if comp_regx.is_match("") {
+						return Err(LexerError::empty(rule_name, regx_val, n, s));
+					}
 				}
-			}
-			Err(e) => {
-				return Err(LexerError::regex(e, n, s));
-			}
-		};
-		if !names.insert(rule_name) {
-			let prev = rules.iter().find(|x| x.0 == rule_name).unwrap().1 .1;
-			return Err(LexerError::duplicate_name(
-				rule_name,
-				prev,
-				lines[prev],
-				n,
-				s,
-			));
-		};
-		rules.push((rule_name, (regx_val, n)));
+				Err(e) => {
+					return Err(LexerError::regex(e, n, s));
+				}
+			};
+			if !names.insert(rule_name) {
+				let prev = rules.iter().find(|x| x.0 == rule_name).unwrap().1 .1;
+				return Err(LexerError::duplicate_name(
+					rule_name,
+					prev,
+					lines[prev],
+					n,
+					s,
+				));
+			};
+			rules.push((rule_name, (regx_val, n)));
+		}
 		lines.push(s);
 	}
 	Ok(rules
@@ -141,9 +140,12 @@ name : "[a-zA-Z_][0-9a-zA-Z_]*"
 comment : "#.*""##;
 
 	#[test]
-	#[should_panic]
 	fn test_scan_non_space_past_regex() {
-		print_err(scan(TEST_DOC_FAIL_REGFMT)).unwrap();
+		use super::error::LexerErrorKind;
+		let err = print_err(scan(TEST_DOC_FAIL_REGFMT)).unwrap_err();
+		assert!(matches!(err.kind(), LexerErrorKind::Fmt(_)));
+		assert_eq!(err.lineno(), 3);
+		assert_eq!(err.line(), r#" 	 str : ""[^"]*"" .a"#);
 	}
 
 	const TEST_DOC_INVALID_REGX: &str = r##"
@@ -155,9 +157,12 @@ name : "[a-zA-Z_][0-9a-zA-Z_]*"
 comment : "*#.*\]""##;
 
 	#[test]
-	#[should_panic]
 	fn test_scan_invalid_regex() {
-		print_err(scan(TEST_DOC_INVALID_REGX)).unwrap();
+		use super::error::LexerErrorKind;
+		let err = print_err(scan(TEST_DOC_INVALID_REGX)).unwrap_err();
+		assert!(matches!(err.kind(), LexerErrorKind::Regex(_)));
+		assert_eq!(err.lineno(), 6);
+		assert_eq!(err.line(), r#"comment : "*#.*\]""#);
 	}
 
 	const TEST_DOC_DUPLICATE_NAME: &str = r##"
@@ -169,9 +174,21 @@ name : "[a-zA-Z_][0-9a-zA-Z_]*"
 name : "#.*""##;
 
 	#[test]
-	#[should_panic]
 	fn test_scan_duplicate_names() {
-		print_err(scan(TEST_DOC_DUPLICATE_NAME)).unwrap();
+		use super::error::LexerErrorKind;
+		let err = print_err(scan(TEST_DOC_DUPLICATE_NAME)).unwrap_err();
+		assert_eq!(err.lineno(), 6);
+		assert_eq!(err.line(), r##"name : "#.*""##);
+		match err.kind() {
+			LexerErrorKind::DuplicateName {
+				name,
+				previous_lineno: lineno,
+				previous_line: line,
+			} => {
+				assert_eq!((name.as_str(), *lineno, line.as_str()), ("name", 1, r#"name : "[a-zA-Z_][0-9a-zA-Z_]*""#));
+			}
+			_ => { panic!("{:?}", err.kind()); }
+		};
 	}
 
 	const TEST_DOC_EMPTY_REGEX_MATCH: &str = r##"
@@ -184,9 +201,20 @@ comment : "#.*"
 "##;
 
 	#[test]
-	#[should_panic]
 	fn test_scan_empty_regex_match() {
-		print_err(scan(TEST_DOC_EMPTY_REGEX_MATCH)).unwrap();
+		use super::error::LexerErrorKind;
+		let err = print_err(scan(TEST_DOC_EMPTY_REGEX_MATCH)).unwrap_err();
+		assert_eq!(err.lineno(), 1);
+		assert_eq!(err.line(), r#"name : "a?|[a-zA-Z_][0-9a-zA-Z_]*""#);
+		match err.kind() {
+			LexerErrorKind::EmptyRegexMatch {
+				name,
+				regex,
+			} => {
+				assert_eq!((name.as_str(), regex.as_str()), ("name", r#"a?|[a-zA-Z_][0-9a-zA-Z_]*"#));
+			}
+			_ => { panic!("{:?}", err.kind()); }
+		};
 	}
 }
 
