@@ -1,0 +1,6 @@
+det : "\b((the)|(an)|a)\b"
+noun : "\b((cat)|(mouse))\b"
+adj : "\b((black)|(gray)|(white)|(yellow)|(small)|(big)|(quick))\b"
+intransitive_verb : "\b((runs)|(walks)|(sleeps))\b"
+transitive_verb : "\b((eats)|(chases)|(hunts)|(catches)|(sees)|(follows))\b"
+ignore : "\s+"

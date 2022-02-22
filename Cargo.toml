@@ -3,5 +3,6 @@ members = [
 	'lex',
 	'lex/lex-tests',
 	'parse',
+	'parse/parse-tests',
 	'rly_common',
 ]

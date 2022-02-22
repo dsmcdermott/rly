@@ -1,0 +1,21 @@
+[package]
+name = "parse-tests"
+version = "0.1.0"
+edition = "2021"
+
+[[example]]
+name = "calculator"
+test = true
+
+[dependencies]
+parse = { path = '../' }
+lex = { path = '../../lex' }
+
+[build-dependencies]
+parse = { path = '../' }
+lex = { path = '../../lex' }
+
+[dev-dependencies]
+parse = { path = '../' }
+lex = { path = '../../lex' }
+diff = "0.1.12"
