@@ -24,7 +24,7 @@ pub struct LexerWriter<'a> {
 macro_rules! token_rule {
 	() => {
 		r#"		pub const T_{name}: &'static str = r{edge}"{value}"{edge};
-		pub const T_ANCHOR_{name}: &'static str = r{edge}"^{value}"{edge};
+		pub const T_ANCHOR_{name}: &'static str = r{edge}"^({value})"{edge};
 "#
 	};
 }
