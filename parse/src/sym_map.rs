@@ -24,7 +24,7 @@ use crate::{
 	EOF, START,
 };
 
-/// A trait for [discriminant types].
+/// A trait for [discriminant types](crate#discriminants).
 ///
 /// [`Discriminant`] describes how to convert a type to and from [`usize`], as well as the
 /// maximum [`usize`] value it's interoperable with. This is used internally when
