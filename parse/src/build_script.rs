@@ -304,7 +304,6 @@ impl ParserBuilder {
 
 	pub fn force_load_file(&mut self) -> Result<&str, IOError> {
 		self.set_default_values();
-		self.set_rerun().unwrap();
 		let mut fin = File::open(self.location().unwrap())?;
 		let mut src = String::new();
 		fin.read_to_string(&mut src)?;

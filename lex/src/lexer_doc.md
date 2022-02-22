@@ -1,5 +1,5 @@
-This crate contains facilities for generating [lexers][wl] which can parse or lex
-input into [`Token`]'s.
+This crate contains facilities for generating [lexers][wl] which can parse or lex input
+into [`Token`]'s.
 
 Creating [lexers](Lexer) can be done using either the [`LexerWriter`] struct:
 
@@ -54,9 +54,9 @@ fn main() -> Result <(), LexerBuilderError> {
 ```
 
 All three methods ultimately use [`LexerWriter`], which is created using
-[`from_str`](LexerWriter::from_str) to parse a source string, and which contains the
-data necessary to write a lexer module. The other two methods are essentially just
-convinience wrappers around [`LexerWriter::from_str`] and [`LexerWriter::write`].
+[`from_str`](LexerWriter::from_str) to parse a source string, and which contains the data
+necessary to write a lexer module. The other two methods are essentially just convinience
+wrappers around [`LexerWriter::from_str`] and [`LexerWriter::write`].
 
 When using the [`LexerBuilder`] struct, the resulting lexer can be included using the
 macro [`lexer`]. For example:
@@ -94,10 +94,9 @@ let tokens = rules::lex(src);
 
 ## About
 
-[Lexers][wl] (also called "tokenizers",) are, generally speaking, components that can
-scan a text and "tokenize" it or brake it up into "tokens", which are the basic,
-discreet units used to analyze the text. For example, in the following line of Rust
-code:
+[Lexers][wl] (also called "tokenizers",) are, generally speaking, components that can scan
+a text and "tokenize" it or brake it up into "tokens", which are the basic, discreet units
+used to analyze the text. For example, in the following line of Rust code:
 
 ```
 let x = 5 + 4;
@@ -106,31 +105,29 @@ let x = 5 + 4;
 the tokens would be: `let`, `x`, `=`, `5`, `+`, `4`, and `;` (there are also spaces
 inbetween these tokens, but these are [ignored][ei] by the compiler.) These tokens are
 also categorized in a way that the compiler understand (namely `KW_LET`, `IDENTIFIER`,
-`Eq`, `INTEGER_LITERAL`, `Plus`, `INTEGER_LITERAL`, and `Semi` respectively) and may
-also carry around data about their location in the source for error
-messages.[^rust_tok]
+`Eq`, `INTEGER_LITERAL`, `Plus`, `INTEGER_LITERAL`, and `Semi` respectively) and may also
+carry around data about their location in the source for error messages.[^rust_tok]
 
 [^rust_tok]: See the
-[reference](https://doc.rust-lang.org/stable/reference/lexical-structure.html) for
-more details on how Rust in particular handles tokens.
+[reference](https://doc.rust-lang.org/stable/reference/lexical-structure.html) for more
+details on how Rust in particular handles tokens.
 
-This crate contains code for automatically generating Rust source code for lexers, as
-well as the dependencies used by them. Once generated, these lexers can be included
-and used in any package that has this crate as a dependency. This process can be
-automated using [build scripts][bs] with cargo, with the helper struct
-[`LexerBuilder`] and macro [`lexer!`].
+This crate contains code for automatically generating Rust source code for lexers, as well
+as the dependencies used by them. Once generated, these lexers can be included and used in
+any package that has this crate as a dependency. This process can be automated using
+[build scripts][bs] with cargo, with the helper struct [`LexerBuilder`] and macro
+[`lexer!`].
 
 ## Lexer Structure
 
 These lexers are written as module named `lexer` containing 4 public items. These are:
 
-* An enum called `TokenKind`, whose variants are constants of the form `<name>` for
-each [token rule](crate#rules) except for [`ignore` and `error`][ei] (if present,) and
-acts as the discriminant for [`Token`]'s returned by the lexer. `TokenKind` implements
-[`Debug`](std::fmt::Debug), [`Clone`], [`Copy`], [`PartialEq`], [`Eq`],
-[`PartialOrd`], [`Ord`], and [`Hash`](std::hash::Hash). It also implements
-[`Display`](std::fmt::Display), with the displayed value for a variant being
-"`<name>`".
+* An enum called `TokenKind`, whose variants are constants of the form `<name>` for each
+[token rule](crate#rules) except for [`ignore` and `error`][ei] (if present,) and acts as
+the discriminant for [`Token`]'s returned by the lexer. `TokenKind` implements
+[`Debug`](std::fmt::Debug), [`Clone`], [`Copy`], [`PartialEq`], [`Eq`], [`PartialOrd`],
+[`Ord`], and [`Hash`](std::hash::Hash). It also implements [`Display`](std::fmt::Display),
+with the displayed value for a variant being "`<name>`".
 
 * A type alias `Token<'a>` which is an alias for [`Token<'a, TokenKind>`], the type of
 tokens parsed by the lexer. [See there] for more details.
@@ -141,22 +138,21 @@ creates a new instance of a `Lexer`, containing all the rules and data necessary
 lexing an input, and [`lex`](IntoTokens::lex), which creates an instance of `Tokens`,
 which iterates over the lazily parsed `Token`'s of a given input.
 
-* And finaly, a struct called `Tokens<'r, 's>`, where `'r` is the lifetime of the
-`Lexer` that spawned it (see above), and `'s` is the lifetime of its input text.
-`Tokens<'_, 's>` implements the [`Tokens<'s, TokenKind>`] trait with `TokenKind` (see
-above) being the discriminant. This means in particular that `Tokens` is an [Iterator]
-over the lazily parsed tokens of its input, with the [item](Iterator::Item) type being
-[`Result<Token<'_>, Error>`]; returning an [`Err`] when the [error rule][ei] is
-triggered, or when encountering an unmatchable string, and returning [`Ok(token)`]
-otherwise.
+* And finaly, a struct called `Tokens<'r, 's>`, where `'r` is the lifetime of the `Lexer`
+that spawned it (see above), and `'s` is the lifetime of its input text. `Tokens<'_, 's>`
+implements the [`Tokens<'s, TokenKind>`] trait with `TokenKind` (see above) being the
+discriminant. This means in particular that `Tokens` is an [Iterator] over the lazily
+parsed tokens of its input, with the [item](Iterator::Item) type being [`Result<Token<'_>,
+Error>`]; returning an [`Err`] when the [error rule][ei] is triggered, or when
+encountering an unmatchable string, and returning [`Ok(token)`] otherwise.
 
 The public interfaces of both `Lexer` and `Tokens` are completely described by the
 corresponding traits [`Lexer`] and [`Tokens`], respectively. However, both types are
-guarenteed to seperately implement all off the methods of their respective traits,
-**with no difference between the two implementation**. In particular the type `Lexer`
-implements `lex` as a method of type `<'r, 's>(&'r self, inp: &'s str) -> Tokens<'r,
-'s>`. This means that the interfaces for these types can be used without having to
-import the associated traits. For example:
+guarenteed to seperately implement all off the methods of their respective traits, **with
+no difference between the two implementation**. In particular the type `Lexer` implements
+`lex` as a method of type `<'r, 's>(&'r self, inp: &'s str) -> Tokens<'r, 's>`. This means
+that the interfaces for these types can be used without having to import the associated
+traits. For example:
 
 ``` ignore
 lex::lexer!();
@@ -170,41 +166,39 @@ let identical_lexer = <Lexer as lex::Lexer<_>>::new();	// same as 'first_lexer';
 
 Note that the `#[allow(unused_code)]` attribute is set for the generated module, so
 compiler warnings wont be generated for not using any of the items, just like with an
-external crate. For example, in the above example the items `Error`, `Token`, and
-`Tokens` are not used, but no warning would be generated.
+external crate. For example, in the above example the items `Error`, `Token`, and `Tokens`
+are not used, but no warning would be generated.
 
 # Lexer Definitions
 
 ## Rules
 
 Lexer definitions are utf-8 formatted strings (such as rust's [str] and [String]) that
-define a list of rules for parsing tokens (see [below](crate#syntax) for the syntax.)
-Each rule defines a *name* and a *regex*, where the *name* introduces a new category
-of tokens to recognize, and *regex* is a non-empty-matching regex that describes how
-to identify the category of token. For example, the following line introduced a rule
-with name "`ident`" and with regex "`\[a-zA-Z\]+\[_a-zA-Z0-9\]*`":
+define a list of rules for parsing tokens (see [below](crate#syntax) for the syntax.) Each
+rule defines a *name* and a *regex*, where the *name* introduces a new category of tokens
+to recognize, and *regex* is a non-empty-matching regex that describes how to identify the
+category of token. For example, the following line introduced a rule with name "`ident`"
+and with regex "`\[a-zA-Z\]+\[_a-zA-Z0-9\]*`":
 
 ``` text
 ident : "[a-zA-Z]+[_a-zA-Z0-9]*"
 ```
 
-Again, see [below](crate#syntax) for details about the syntax. This means that when
-the generated lexer (or, more accurately, an instance of
-[`Tokens`](crate#lexer-structure) spawned by an instance of the generated
-[`Lexer`](crate#lexer-structure) type) is parsing an input string, and the regex
-"`\[a-bA-B\]+\[_a-bA-B0-9\]*`" matches the begining of the unparsed portion, the
-matching text gets parsed and returned as an "`ident`" token (see
-[above](crate#lexer-structure) and [`Token`].) The exceptions to this are rules with
-the name "`error`" or "`ignore`" (see [below][ei].)
+Again, see [below](crate#syntax) for details about the syntax. This means that when the
+generated lexer (or, more accurately, an instance of [`Tokens`](crate#lexer-structure)
+spawned by an instance of the generated [`Lexer`](crate#lexer-structure) type) is parsing
+an input string, and the regex "`\[a-bA-B\]+\[_a-bA-B0-9\]*`" matches the begining of the
+unparsed portion, the matching text gets parsed and returned as an "`ident`" token (see
+[above](crate#lexer-structure) and [`Token`].) The exceptions to this are rules with the
+name "`error`" or "`ignore`" (see [below][ei].)
 
-If no rules can be matched to the begining of the unparsed input, then the lexer
-returns an [`Error`].
+If no rules can be matched to the begining of the unparsed input, then the lexer returns
+an [`Error`].
 
-Note that the order in which the rules are defined *does* matter: if multiple rules
-match the begining of the unparsed portion of the input, then the first defined rule
-matches. This may cause unexpected problems where an input is valid when parsed one
-way, but invalid when parsed another. For example, suppose you have a lexer with two
-rules:
+Note that the order in which the rules are defined *does* matter: if multiple rules match
+the begining of the unparsed portion of the input, then the first defined rule matches.
+This may cause unexpected problems where an input is valid when parsed one way, but
+invalid when parsed another. For example, suppose you have a lexer with two rules:
 
 ``` text
 foo : "abc"
@@ -218,26 +212,25 @@ abc def
 ```
 
 This whole string would match "`bar`", but since "`foo`" is defined first it instead
-matches "`abc`" to `foo`, and then raises an error for "` def`", since neither "`foo`"
-nor "`bar`" matches "` def`".
+matches "`abc`" to `foo`, and then raises an error for "` def`", since neither "`foo`" nor
+"`bar`" matches "` def`".
 
 Rules also cannot be defined twice: that is, no two rules can have the same name.
 
 ## `error` and `ignore`
 
-Rules with the [name](crate#rules) "`error`" or "`ignore`" behave differently from
-normal rules: rather than of defining a type of token and describing how to recognize
-it, they insted trigger special behaviour by the lexer when ther
-[regexes](crate#rules) match.
+Rules with the [name](crate#rules) "`error`" or "`ignore`" behave differently from normal
+rules: rather than of defining a type of token and describing how to recognize it, they
+insted trigger special behaviour by the lexer when ther [regexes](crate#rules) match.
 
 When the `error` rule is matched, instead of returning a token, the lexer returns an
 [`Error`] with [kind](ErrorKind) [`ErrorRule`](ErrorKind::ErrorRule) and with the
-offending text as the [`val`](Error::val). When the `ignore` rule is matched, instead
-of returning anything, the lexer simply skips over the matched text.
+offending text as the [`val`](Error::val). When the `ignore` rule is matched, instead of
+returning anything, the lexer simply skips over the matched text.
 
 Note that, just as with normal rules, the order in which `error` and/or `ignore` are
-defined relatve to the other rules matters for matching. For example, suppose you have
-a lexer with the following rules:
+defined relatve to the other rules matters for matching. For example, suppose you have a
+lexer with the following rules:
 
 ``` text
 foo : "abc"
@@ -252,18 +245,18 @@ And suppose it's trying to lex the following input:
 abc def
 ```
 
-This would return the tokens "`foo(abc)`" and "`bar(def)`" without error, despite the
-fact that `error` matches the whole text, because `foo` is defined before `error`; it
-would first match `foo` against "`abc`", then `ignore` against "` `", and then `bar`
-against "`def`".
+This would return the tokens "`foo(abc)`" and "`bar(def)`" without error, despite the fact
+that `error` matches the whole text, because `foo` is defined before `error`; it would
+first match `foo` against "`abc`", then `ignore` against "` `", and then `bar` against
+"`def`".
 
 ## Syntax
 
 ### Rule Syntax
 
-As decribed [above](crate#rules), a lexer definition is a utf-8 string defining a list
-of rules to use when lexing. Rules are seperated by newlines ('\n' `U+000A`) and empty
-lines are ignored. The general syntax for a rule is as follows:
+As decribed [above](crate#rules), a lexer definition is a utf-8 string defining a list of
+rules to use when lexing. Rules are seperated by newlines ('\n' `U+000A`) and empty lines
+are ignored. The general syntax for a rule is as follows:
 
 ``` text
 rule ::= name | divider | regex			(no newlines)
@@ -272,10 +265,10 @@ divider ::= [[:space:]]:[[:space:]]
 regex ::= ".+"
 ```
 
-Whitespace between the components of a `rule` is generally ignored, with the exception
-of `divider`'s which, as noted above, must have at least one whitespace character
-between it and the `name` and `regex`, and with the exception that newlines (`U+000A`)
-cannot occur within a rule.
+Whitespace between the components of a `rule` is generally ignored, with the exception of
+`divider`'s which, as noted above, must have at least one whitespace character between it
+and the `name` and `regex`, and with the exception that newlines (`U+000A`) cannot occur
+within a rule.
 
 A `rule` consists of a [`name`](crate#rules), a `divider` ('`:`'), and a
 [`regex`](crate#rules). A `name` must start with an ASCII alphabetical character
@@ -290,17 +283,16 @@ f_0O : "(?P<interpunct>\u00B7)(?P<word>\w+)"
 trailing_whitespace : "((?m)\s+$)"
 ```
 
-The only exceptions to this are the terms "`crate`", "`self`", "`super`", and
-"`Self`", which cannot be used as `name`'s. This is due to restrictions rust places on
-its own identifiers and how the generated [lexers](crate#lexer-structure) are
-implemented.
+The only exceptions to this are the terms "`crate`", "`self`", "`super`", and "`Self`",
+which cannot be used as `name`'s. This is due to restrictions rust places on its own
+identifiers and how the generated [lexers](crate#lexer-structure) are implemented.
 
-A `divider` is the character '`:`' (`U+003A`) with at least one (non-newline)
-whitespace character between it and the `name`, and between it and the `regex`
+A `divider` is the character '`:`' (`U+003A`) with at least one (non-newline) whitespace
+character between it and the `name`, and between it and the `regex`
 
 A `regex` is a [regular expression](https://en.wikipedia.org/wiki/Regular_expression)
-introduced by a '`"`' (`U+0022`) and ended by another '`"`'. `"`'s within a `regex` do
-not need to be escaped (and in fact, trying to escape them will raise an
+introduced by a '`"`' (`U+0022`) and ended by another '`"`'. `"`'s within a `regex` do not
+need to be escaped (and in fact, trying to escape them will raise an
 [error](::regex::Error) as a non-recognized escape sequence,) but no non-whitespace
 characters can occur after the final '`"`'. For example, in the following definition:
 
@@ -314,8 +306,7 @@ appearing between the initial '`"`' and the final '`"`' being interpreted as lit
 
 `regex`'s are parsed according to the crate [`regex`](::regex) (with one
 exception[^exception],) using the same default flags, and must be valid regular
-expressions according to the [rules of that crate](::regex#syntax). For example, the
-rule:
+expressions according to the [rules of that crate](::regex#syntax). For example, the rule:
 
 ``` text
 space_no_nl : "[[:space:]&&[^\n]]"
@@ -328,36 +319,35 @@ while the rule:
 start_with_a_invalid : "a(*)"
 ```
 
-would be invalid since the repition operator `*` is unescaped and lacks an expression
-to operate on.
+would be invalid since the repition operator `*` is unescaped and lacks an expression to
+operate on.
 
 See the [documentation on the crate `regex`](::regex#syntax) for more info.
 
-[^exception]: The one exception is that an anchor '`^`' always matches the begining of
-the unparsed input (as well as the beginings of lines if [the `m` flag is
+[^exception]: The one exception is that an anchor '`^`' always matches the begining of the
+unparsed input (as well as the beginings of lines if [the `m` flag is
 set](#grouping-and-flags).) For example the regex "`^abc`" would behave almost exactly
 like the regex "`abc`", the one exception to *that* being error messages, where, upon
-encountering a section of text that cannot be matched, the lexer will search ahead to
-find the nearest matching text in order to define the range of text that cannot be
-matched. When this happens, anchors in regexes currently still match against the
-begining the remaining text, including the unmachable portion. So, for example, if you
-were to have two lexers, each with a single rule, with regexes "`^abc`" and "`abc`"
-respectively, both would behave the same on the input "`abcabc`", returning two tokens
-with the content "`abc`". But, on the string "`abcdefabc`", while both lexers would
-retrun a token with "`abc`", and both lexers would then return an error, in that error
-the second lexer would report the string "`def`" (up to the begining of "`abc`" in
-"`defabc`") as being unparsable, while the first would report the string "`defabc`" as
-being unparsable (since "`^abc`" doesn't match anywhere in "`defabc`",) returning a
-less precise error message. This might be fixed later.
+encountering a section of text that cannot be matched, the lexer will search ahead to find
+the nearest matching text in order to define the range of text that cannot be matched.
+When this happens, anchors in regexes currently still match against the begining the
+remaining text, including the unmachable portion. So, for example, if you were to have two
+lexers, each with a single rule, with regexes "`^abc`" and "`abc`" respectively, both
+would behave the same on the input "`abcabc`", returning two tokens with the content
+"`abc`". But, on the string "`abcdefabc`", while both lexers would retrun a token with
+"`abc`", and both lexers would then return an error, in that error the second lexer would
+report the string "`def`" (up to the begining of "`abc`" in "`defabc`") as being
+unparsable, while the first would report the string "`defabc`" as being unparsable (since
+"`^abc`" doesn't match anywhere in "`defabc`",) returning a less precise error message.
+This might be fixed later.
 
 #### Escapes
 
-Note that, because the utf-8 text is used directly to create a
-[`Regex`](crate::Regex), when writing a `.lex` source file with a text editor the
-result is equivalent to calling [`Regex::new`] on the `regex` interpreted as a rust
-[raw string
-literal](https://doc.rust-lang.org/reference/tokens.html#raw-string-literals) (with an
-`r` before the string, followed by as many `#`' as necessary.) For example, the rule:
+Note that, because the utf-8 text is used directly to create a [`Regex`](crate::Regex),
+when writing a `.lex` source file with a text editor the result is equivalent to calling
+[`Regex::new`] on the `regex` interpreted as a rust [raw string
+literal](https://doc.rust-lang.org/reference/tokens.html#raw-string-literals) (with an `r`
+before the string, followed by as many `#`' as necessary.) For example, the rule:
 
 ``` text
 name : "\w+"
@@ -387,8 +377,8 @@ error: unknown character escape: `w`
   = help: for more information, visit <https://static.rust-lang.org/doc/master/reference.html#literals>
 ```
 
-because the sequence "`\w`" would be parsed as an escape sequence at the level of the
-rust source code, which would trigger an error since "`\w`" is not a valid [escape
+because the sequence "`\w`" would be parsed as an escape sequence at the level of the rust
+source code, which would trigger an error since "`\w`" is not a valid [escape
 sequence](https://doc.rust-lang.org/reference/tokens.html#character-escapes) in rust.
 However, if we were to instead use one of the following examples:
 
@@ -404,11 +394,11 @@ assert_eq!(name.as_str(), equivalent_name.as_str());
 ```
 
 it would work fine, since, with either option, a string consisting of the characters
-'`\`', '`w`', and '`+`' would be sent to [`Regex::new`](::regex::Regex::new), and so
-the sequence "`\w`" would get processed on the level of the regex (specifically [as a
+'`\`', '`w`', and '`+`' would be sent to [`Regex::new`](::regex::Regex::new), and so the
+sequence "`\w`" would get processed on the level of the regex (specifically [as a
 character class matching unicode word
-characters](::regex#perl-character-classes-unicode-friendly).) However, if were to use
-the second option, "`\\w+`", for our rule instead:
+characters](::regex#perl-character-classes-unicode-friendly).) However, if were to use the
+second option, "`\\w+`", for our rule instead:
 
 ``` text
 incorect_word : "\\w+"
@@ -426,8 +416,8 @@ which would match a literal '`\`', followed by a non-empty sequence of `w`'s!
 
 ### Coments
 
-Comments can also be used with lexer definitions: A line that has `#` (`U+0023`) as
-its first non-space character is interpreted as a comment and is ignored. For example:
+Comments can also be used with lexer definitions: A line that has `#` (`U+0023`) as its
+first non-space character is interpreted as a comment and is ignored. For example:
 
 ``` text
 ## this is a lexer definition file
@@ -448,11 +438,11 @@ comment : "[[:space:]]*#.*$"
 
 # Example
 
-Suppose you want to build a simple calculator that can handle addition and subtraction
-on integers, as well as understand decimal, hexadecimal, octal, and binary integers in
-the same format as [rust integer literals][il] (without underscores, for simplicity.)
-We would start by making a new project "`calculator`" with `cargo new`, which would
-give us something like the following directory structure:
+Suppose you want to build a simple calculator that can handle addition and subtraction on
+integers, as well as understand decimal, hexadecimal, octal, and binary integers in the
+same format as [rust integer literals][il] (without underscores, for simplicity.) We would
+start by making a new project "`calculator`" with `cargo new`, which would give us
+something like the following directory structure:
 
 ``` text
 calculator/
@@ -498,10 +488,9 @@ fn main() -> Result<(), LexerBuilderError> {
 }
 ```
 
-What this does is create a new [`LexerBuilder`], call [`build`](LexerBuilder::build)
-to build a lexer, and then call [`set_rerun`](LexerBuilder::set_rerun) to set cargo to
-watch our lexer source file for changes and rerun the build script when it detects
-one.
+What this does is create a new [`LexerBuilder`], call [`build`](LexerBuilder::build) to
+build a lexer, and then call [`set_rerun`](LexerBuilder::set_rerun) to set cargo to watch
+our lexer source file for changes and rerun the build script when it detects one.
 
 Now, if you were to try to build the package as-is, with `cargo build`, you would
 encounter the following error:
@@ -517,21 +506,20 @@ Caused by:
 ```
 
 This is because [`LexerBuilder`] cannot find our lexer source file (because we haven't
-written any yet.) As explained at [`LexerBuilder`](LexerBuilder#name-and-location),
-the [`LexerBuilder`], by default, looks for a source file with the name of the current
-project plus "`_lex.lex`".
+written any yet.) As explained at [`LexerBuilder`](LexerBuilder#name-and-location), the
+[`LexerBuilder`], by default, looks for a source file with the name of the current project
+plus "`_lex.lex`".
 
-So, our next step is to make this file. Remember, we want to be able to recognize
-addition and subtraction (as well as negation,) and be able to recognize numbers
-written in base 2, 8, 10, and 16 using [the same format as rust][il]. Let's also say
-that whitespace is ignored.
+So, our next step is to make this file. Remember, we want to be able to recognize addition
+and subtraction (as well as negation,) and be able to recognize numbers written in base 2,
+8, 10, and 16 using [the same format as rust][il]. Let's also say that whitespace is
+ignored.
 
 (Before reading further, it might be worthwhile to try and come up with a `.lex` file
-yourself as an exercise. Using [the 'syntax' section of this
-documentation](self#syntax) and [the rust integer literal rules][il] (remember, we're
-ignoring underscores '`_`' between digits for simplicity's sake) as guides, try and
-make a valid `.lex` file that achieves what we want, and compare your answer to the
-sample given below.)
+yourself as an exercise. Using [the 'syntax' section of this documentation](self#syntax)
+and [the rust integer literal rules][il] (remember, we're ignoring underscores '`_`'
+between digits for simplicity's sake) as guides, try and make a valid `.lex` file that
+achieves what we want, and compare your answer to the sample given below.)
 
 We would therefore make a file called `calculator_lex.lex` as follows[^precedence]:
 
@@ -547,11 +535,11 @@ MINUS : "-"
 ignore : "\s+"
 ```
 
-[^precedence]: Note that because of the [precedence rules](self#rules) the order in
-which `DEC` is placed relative to `BIN`, `OCT`, and `HEX` does matter! For example, if
-`DEC` were placed higher than `HEX`, then when trying to lex "`0xA`" it would first
-return "`0`" as a `DEC`, and then return an [`Error`] for "`xA`", instead of just
-parsing the whole thing as a `HEX`, which is clearly not what we want.
+[^precedence]: Note that because of the [precedence rules](self#rules) the order in which
+`DEC` is placed relative to `BIN`, `OCT`, and `HEX` does matter! For example, if `DEC`
+were placed higher than `HEX`, then when trying to lex "`0xA`" it would first return "`0`"
+as a `DEC`, and then return an [`Error`] for "`xA`", instead of just parsing the whole
+thing as a `HEX`, which is clearly not what we want.
 
 Your directory structure should look something like this (minus any `Cargo.lock` or
 `target/` files:)
@@ -565,19 +553,18 @@ calculator/
     └── main.rs
 ```
 
-The next step, after having made a build script to automatically generate our lexer,
-is to include that lexer in our source code. [`LexerBuilder`] writes the
+The next step, after having made a build script to automatically generate our lexer, is to
+include that lexer in our source code. [`LexerBuilder`] writes the
 [module](self#lexer-structure) it generates to the directory set by cargo in the
-[`OUT_DIR`][od] environment variable, and it by default writes it as a file with the
-name of the package plus "`_lex.rs`". Therefore, if wanted to include the lexer in our
-code, we could do something like this:
+[`OUT_DIR`][od] environment variable, and it by default writes it as a file with the name
+of the package plus "`_lex.rs`". Therefore, if wanted to include the lexer in our code, we
+could do something like this:
 
 ``` ignore
 include!(concat!(env!("OUT_DIR"), "/calculator_lex.rs"));
 ```
 
-However, this crate already contains a helper macro [`lexer!`] which we can use
-instead:
+However, this crate already contains a helper macro [`lexer!`] which we can use instead:
 
 ``` ignore
 // src/main.rs
@@ -585,13 +572,13 @@ instead:
 lex::lexer!();
 ```
 
-Either way, this includes a [module](self#lexer-structure) called "`lexer`", generated
-by [`LexerBuilder`] which contains the type `Lexer` whose instances can lex inputs by
+Either way, this includes a [module](self#lexer-structure) called "`lexer`", generated by
+[`LexerBuilder`] which contains the type `Lexer` whose instances can lex inputs by
 spawning `Tokens`', which iterate over the lazily parsed tokens of a given input (see
 [above](self#lexer-structure) for more details.)
 
-Now that we have our lexer, we can use it to write our calculator. Write the following
-for `src/main.rs`:
+Now that we have our lexer, we can use it to write our calculator. Write the following for
+`src/main.rs`:
 
 ``` ignore
 // src/main.rs
