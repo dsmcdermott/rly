@@ -63,7 +63,7 @@ impl<N: Prim, T: Prim> GrammarRules<N, T> {
 		let mut deq = VecDeque::new();
 		for key in self.rules.keys().copied() {
 			self.firsts.insert(key, self.firsts_basic(&key));
-			deq.push_front(key);
+			deq.push_back(key);
 		}
 
 		loop {
@@ -74,15 +74,15 @@ impl<N: Prim, T: Prim> GrammarRules<N, T> {
 			};
 
 			// Adds the firsts for each non-term that appears at the beginning of a rule
-			// for lhs. If any new firsts were added, or if the set of firts for lhs is
+			// for lhs. If any new firsts were added, or if the set of firsts for lhs is
 			// still empty, lhs is pushed to the back of the deque to be processed again
 			// later.
-			let mut is_complete = true;
+			let mut is_incomplete = false;
 			let mut set = self.firsts.remove(&lhs).unwrap();
-			self.update_firsts(&lhs, &mut set, &mut is_complete);
-			is_complete &= !set.is_empty();
+			self.update_firsts(&lhs, &mut set, &mut is_incomplete);
+			is_incomplete |= set.is_empty();
 			self.firsts.insert(lhs, set);
-			if !is_complete {
+			if is_incomplete {
 				deq.push_back(lhs);
 			};
 		}
@@ -103,7 +103,7 @@ impl<N: Prim, T: Prim> GrammarRules<N, T> {
 	// Adds to 'set' all the known firsts of each non-term that appears at the beginning
 	// of some rule for 'lhs', setting 'is_complete' to false if any new terminals are
 	// added.
-	fn update_firsts(&self, lhs: &N, set: &mut HashSet<T>, is_complete: &mut bool) {
+	fn update_firsts(&self, lhs: &N, set: &mut HashSet<T>, is_incomplete: &mut bool) {
 		self.rules
 			.get(lhs)
 			.unwrap()
@@ -113,7 +113,7 @@ impl<N: Prim, T: Prim> GrammarRules<N, T> {
 			.flat_map(|sym| self.firsts.get(&sym).unwrap())
 			.copied()
 			.for_each(|sym| {
-				*is_complete &= set.insert(sym);
+				*is_incomplete |= set.insert(sym);
 			});
 	}
 
