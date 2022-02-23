@@ -13,17 +13,17 @@ mod lexer {
 
 	mod rules {
 		pub const T_id: &'static str = r"[a-zA-Z_][0-9a-zA-Z_]*";
-		pub const T_ANCHOR_id: &'static str = r"^[a-zA-Z_][0-9a-zA-Z_]*";
+		pub const T_ANCHOR_id: &'static str = r"^([a-zA-Z_][0-9a-zA-Z_]*)";
 		pub const T_mul: &'static str = r"\*";
-		pub const T_ANCHOR_mul: &'static str = r"^\*";
+		pub const T_ANCHOR_mul: &'static str = r"^(\*)";
 		pub const T_sum: &'static str = r"\+";
-		pub const T_ANCHOR_sum: &'static str = r"^\+";
+		pub const T_ANCHOR_sum: &'static str = r"^(\+)";
 		pub const T_ignore: &'static str = r"[[:space:]]+";
-		pub const T_ANCHOR_ignore: &'static str = r"^[[:space:]]+";
+		pub const T_ANCHOR_ignore: &'static str = r"^([[:space:]]+)";
 		pub const T_int: &'static str = r"[0-9]+";
-		pub const T_ANCHOR_int: &'static str = r"^[0-9]+";
+		pub const T_ANCHOR_int: &'static str = r"^([0-9]+)";
 		pub const T_error: &'static str = r"\\";
-		pub const T_ANCHOR_error: &'static str = r"^\\";
+		pub const T_ANCHOR_error: &'static str = r"^(\\)";
 		pub const IGNORE_INDEX: usize = 3;
 		pub const ERROR_INDEX: usize = 5;
 	}

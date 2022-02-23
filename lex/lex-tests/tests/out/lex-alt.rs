@@ -13,23 +13,23 @@ mod lexer {
 
 	mod rules {
 		pub const T_BIN: &'static str = r"0b[01]+";
-		pub const T_ANCHOR_BIN: &'static str = r"^0b[01]+";
+		pub const T_ANCHOR_BIN: &'static str = r"^(0b[01]+)";
 		pub const T_OCT: &'static str = r"0o[0-7]+";
-		pub const T_ANCHOR_OCT: &'static str = r"^0o[0-7]+";
+		pub const T_ANCHOR_OCT: &'static str = r"^(0o[0-7]+)";
 		pub const T_HEX: &'static str = r"0x[0-9a-fA-F]+";
-		pub const T_ANCHOR_HEX: &'static str = r"^0x[0-9a-fA-F]+";
+		pub const T_ANCHOR_HEX: &'static str = r"^(0x[0-9a-fA-F]+)";
 		pub const T_DEC: &'static str = r"[0-9]+";
-		pub const T_ANCHOR_DEC: &'static str = r"^[0-9]+";
+		pub const T_ANCHOR_DEC: &'static str = r"^([0-9]+)";
 		pub const T_error: &'static str = r"(?i:zero|one|two|three|four|five|six|seven|eight|nine|ten)";
-		pub const T_ANCHOR_error: &'static str = r"^(?i:zero|one|two|three|four|five|six|seven|eight|nine|ten)";
+		pub const T_ANCHOR_error: &'static str = r"^((?i:zero|one|two|three|four|five|six|seven|eight|nine|ten))";
 		pub const T_IDENT: &'static str = r"[[:alpha:]]+[0-9_[:alpha:]]*";
-		pub const T_ANCHOR_IDENT: &'static str = r"^[[:alpha:]]+[0-9_[:alpha:]]*";
+		pub const T_ANCHOR_IDENT: &'static str = r"^([[:alpha:]]+[0-9_[:alpha:]]*)";
 		pub const T_PLUS: &'static str = r"\+";
-		pub const T_ANCHOR_PLUS: &'static str = r"^\+";
+		pub const T_ANCHOR_PLUS: &'static str = r"^(\+)";
 		pub const T_MINUS: &'static str = r"-";
-		pub const T_ANCHOR_MINUS: &'static str = r"^-";
+		pub const T_ANCHOR_MINUS: &'static str = r"^(-)";
 		pub const T_ignore: &'static str = r"\s+";
-		pub const T_ANCHOR_ignore: &'static str = r"^\s+";
+		pub const T_ANCHOR_ignore: &'static str = r"^(\s+)";
 		pub const IGNORE_INDEX: usize = 8;
 		pub const ERROR_INDEX: usize = 4;
 	}
