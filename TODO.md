@@ -38,7 +38,7 @@ variant names.
 
 ## Testing
 
-- [ ] Come up with a better/more comprehensive automated testing suite.
+- [x] Come up with a better/more comprehensive automated testing suite.
 
 This one is tricky since the nature of this project (focused on dynamically generating
 rust code at build time) doesn't play nice with the normal cargo testing tools, but it

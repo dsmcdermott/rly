@@ -84,13 +84,11 @@ by those crates.
 # Building the Package
 
 Once the repository has been cloned, all you need to do to build it is run `cargo build`
-inside the root directory of the project.
-
-However, since this is (currently) a library package only, there's not much point to
-building it on its own. To use it as a part of another project, you can either clone the
-repository and add the necessary crates as [path dependencies] to you `Cargo.toml` file,
-or you can add the crates as [git dependencies] and cargo will automatically download and
-build them as necessary.
+inside the root directory of the project. However, since this is (currently) a library
+package only, there's not much point to building it on its own. To use it as a part of
+another project, you can either clone the repository and add the necessary crates as [path
+dependencies] to you `Cargo.toml` file, or you can add the crates as [git dependencies]
+and cargo will automatically download and build them as necessary.
 
 ## Building the Documentation
 
@@ -100,6 +98,16 @@ locally.
 To build the documentation for this project, run `cargo doc` inside the top-level
 directory for the workspace. The html documentation for `lex`, `parse`, and `rly_common`
 can then be found as directories in `targed/doc`.
+
+## Testing
+
+Because a significant portion of this package deals with, at least for a typical use case,
+generating rust code at build-time, the integration tests, and some of the doc tests, for
+`lex` and `parse` are placed in their own crates, named `lex-tests` and `parse-tests`
+respectively and located in subdirectories of the associated crates. These tests will be
+automatically built and run when running `cargo test` in the package root or with the
+`--workspace` flag, but can otherwise be run by using the normal [package selection]
+methods with `cargo test` to specify either `lex-tests` or `parse-tests`.
 
 
 
@@ -111,5 +119,6 @@ can then be found as directories in `targed/doc`.
 [LALR parser]: https://en.wikipedia.org/wiki/LALR_parser
 [`str`]: https://doc.rust-lang.org/std/primitive.str.html
 [`Iterator`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html
-[path dependencies]: file:///home/sam/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/doc/rust/html/cargo/reference/specifying-dependencies.html#specifying-path-dependencies
-[git dependencies]: file:///home/sam/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/share/doc/rust/html/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
+[path dependencies]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-path-dependencies
+[git dependencies]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#specifying-dependencies-from-git-repositories
+[package selection]: https://doc.rust-lang.org/cargo/commands/cargo-test.html#package-selection
