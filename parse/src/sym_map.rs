@@ -415,7 +415,9 @@ Fact ->
 
 	#[test]
 	fn test_new() {
-		println!("{:?}", SymMap::new(&Scanner::scan_text(TEST_DOC).unwrap()));
+		let SymMap { non_terms, terms } = SymMap::new(&Scanner::scan_text(TEST_DOC).unwrap());
+		assert_eq!(&non_terms, &["Expr", "Fact", "Start"]);
+		assert_eq!(&terms, &[crate::EOF, "lparen", "n", "plus", "rparen"]);
 	}
 
 	#[test]

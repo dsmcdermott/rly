@@ -676,20 +676,4 @@ mod tests {
 		assert_eq!(closure, HashSet::from(test_items));
 		assert_eq!(kernel, HashSet::from([f(0, EOF)]));
 	}
-
-	#[test]
-	fn test_build_tables() {
-		let rules = alt_test_gr();
-		let mut builder = rules.table_builder();
-		builder.build_tables();
-		assert!(builder.tables.is_empty());
-		println!("{}", builder.table_num);
-		let mut tables = builder.finished_tables;
-		tables.sort_unstable_by_key(|t| t.number());
-		let mut mappings = std::collections::HashMap::new();
-		for i in 0..tables.len() {
-			mappings.insert(tables[i].number, i);
-			tables[i].number = Some(i);
-		}
-	}
 }

@@ -140,7 +140,7 @@ pub mod tests {
 		use grs::{Prim, Symbol};
 		use std::fmt;
 
-		trait IntoSym<S: Prim, T: Prim> {
+		pub(super) trait IntoSym<S: Prim, T: Prim> {
 			fn into_sym(self) -> Symbol<S, T>;
 		}
 
@@ -248,16 +248,56 @@ pub mod tests {
 
 	#[test]
 	fn test_new_gr() {
+		use test_grammar_rules::{IntoSym, Term::*};
 		let rules = test_gr();
-		for (k, v) in rules.rules.iter() {
-			println!("{:?}: {:?}", k, v);
+		let mut rule_data = Vec::new();
+		for (k, mut v) in rules.rules.into_iter() {
+			v.sort_unstable();
+			rule_data.push((k, v));
+		};
+		rule_data.sort_unstable();
+		macro_rules! rule_structure {
+			($lhs: expr, $([$first: expr, $($rhs: expr),*]),+) => {
+				{
+					let mut rhs: Vec<Box<[_]>> = vec![$(Box::new([$first.into_sym(), $($rhs.into_sym()),*])),+];
+					rhs.sort_unstable();
+					($lhs, rhs)
+				}
+			}
 		}
+		let mut reference_rules = vec![
+			rule_structure!("start", ["sum",]),
+			rule_structure!("sum", ["prod",], ["sum", Plus, "prod"]),
+			rule_structure!("prod", ["term",], ["prod", Mul, "term"]),
+			rule_structure!("term", [Int,], [Id,]),
+		];
+		reference_rules.sort_unstable();
+		assert_eq!(rule_data, reference_rules);
 	}
 
 	#[test]
 	fn test_first_sets() {
-		let rules = test_gr();
-		let firsts = rules.firsts();
-		println!("{:?}", firsts);
+		use test_grammar_rules::AltTerm::*;
+		let rules = alt_test_gr();
+		let mut firsts_map = Vec::new();
+		for (n, set) in rules.firsts.into_iter() {
+			let mut firsts: Vec<_> = set.into_iter().collect();
+			firsts.sort_unstable();
+			firsts_map.push((n, firsts));
+		};
+		firsts_map.sort_unstable();
+		let mut reference_firsts = Vec::new();
+		let init: [(_, &[_]); 3] = [
+			("start", &[Num, Add, LParen]),
+			("expr", &[Num, Add, LParen]),
+			("factor", &[Num, Add]),
+		];
+		for (k, v) in init {
+			let mut firsts = v.to_vec();
+			firsts.sort_unstable();
+			reference_firsts.push((k, firsts));
+		};
+		reference_firsts.sort_unstable();
+		assert_eq!(firsts_map, reference_firsts);
 	}
 }

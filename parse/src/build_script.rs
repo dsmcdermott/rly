@@ -609,7 +609,7 @@ macro_rules! build_parser_with {
 /// ```compile_fail
 /// # use parse::ParserError;
 /// # fn main() -> Result<(), ParserError> {
-/// parser::build_parser!(discriminant = u8, N = u8)?;
+/// parse::build_parser!(discriminant = u8, N = u8)?;
 /// Ok(())
 /// # }
 /// ```

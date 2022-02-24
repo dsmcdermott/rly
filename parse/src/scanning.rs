@@ -385,6 +385,16 @@ mod tests {
 		Scanner::new("");
 	}
 
+	macro_rules! rule {
+		($lhs: expr, $($rhs: expr),+) => {
+			{
+				let mut rhs: Vec<Box<[_]>> = vec![$(Box::new($rhs)),+];
+				rhs.sort_unstable();
+				($lhs, rhs)
+			}
+		}
+	}
+
 	const TEST_DOC: &'static str = r#"
 
 Start -> Expr;
@@ -410,8 +420,18 @@ Fact ->
 
 	#[test]
 	fn test_scan() {
+		use std::collections::HashMap;
 		use super::Scanner;
-		println!("{:?}", assert(Scanner::scan_text(TEST_DOC)));
+		let mut rules = assert(Scanner::scan_text(TEST_DOC));
+		for (_k, v) in rules.iter_mut() {
+			v.sort_unstable();
+		};
+		let ref_rules = HashMap::from_iter([
+			rule!("Start", ["Expr"]),
+			rule!("Expr", ["Fact"]),
+			rule!("Fact", ["lparen", "Expr", "rparen"], ["n"], ["plus", "Fact"], ["Fact", "plus", "n"]),
+		]);
+		assert_eq!(rules, ref_rules);
 	}
 
 	const TEST_DOC_ERR: &'static str = r#"
@@ -432,7 +452,17 @@ Fact ->
 
 	#[test]
 	fn test_scan_err() {
-		use super::Scanner;
-		println!("{}", Scanner::scan_text(TEST_DOC_ERR).unwrap_err());
+		use super::{ErrorData, Scanner, SrcError};
+		let err = Scanner::scan_text(TEST_DOC_ERR).unwrap_err();
+		if !matches!(&err, SrcError::MissingDiv(_)) {
+			panic!("wrong error kind: {:?}", err);
+		};
+		match err {
+			SrcError::MissingDiv(data) => {
+				let correct_data = ErrorData::new("lparen Expr rparen".to_string(), 5, 7, 41);
+				assert_eq!(data, correct_data);
+			}
+			_ => unreachable!()
+		}
 	}
 }
