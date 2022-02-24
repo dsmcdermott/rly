@@ -12,29 +12,22 @@ and incorporate it into the crates `lex` and `parse`
 `rly_common::parse` (or wherever the trait `rly_common::parse::Ast` gets moved to) and
 have it replace the `Ast` trait.
 
-## Interface Changes
-
-- [ ] ~~Change instances of the name `NonTerm` in the `Ast` trait (associated type,
-methods, documentation, etc.) to `Label`; having `NonTerm` and `Term` refer concepts
-in slightly different categories is confusing, and `Label` is more
-descriptive/accurate anyway~~
-
 ## Documentation
 
-- [ ] Fill out the documentation on the items in `rly_common::parse` to include
-examples.
+- [ ] Fill out the documentation on the items in ~~`rly_common::parse`~~ (since moved to
+`parse`) to include examples.
 
 ## Parser Specification Language
 
-- [ ] ~~Eliminate the need for `start` and `eof` to be reserved words: Change the parser
+- [x] ~~Eliminate the need for `start` and `eof` to be reserved words: Change the parser
 generation process to no longer assume that the strings "`start`" and "`eof`" are
 available without conflicts with the original specification, and change the specification
 format to include a way of explicitly declaring a starting symbol.~~
 
-- [x] `eof` is no longer reserved. `start` however has been changed to `Start` and is
-still reserved, which is how I intend to keep it for now. `crate`, `self`, `super`, and
-`Self` have been added as reserved words, in line with the new use of raw identifiers for
-variant names.
+`eof` is no longer reserved. `start` however has been changed to `Start` and is still
+reserved, which is how I intend to keep it for now. `crate`, `self`, `super`, and `Self`
+have been added as reserved words, in line with the new use of raw identifiers for variant
+names.
 
 ## Testing
 
