@@ -618,7 +618,7 @@ fn follows<'a, N: Prim, T: Prim>(
 
 #[cfg(test)]
 mod tests {
-	use crate::grammar_rules::tests::{alt_test_gr, test_gr, test_rules, Term};
+	use crate::grammar_rules::tests::{test_gr, test_rules, Term};
 
 	#[test]
 	fn test_new_builder() {
