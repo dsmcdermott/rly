@@ -2,6 +2,7 @@ compile_error!("This is just a template page and should not be compiled");
 
 
 #[allow(nonstandard_style, dead_code, unreachable_patterns)]
+#[allow(clippy::all)]
 mod parser {{
 	//{non_term_vals}
 	//{term_vals}

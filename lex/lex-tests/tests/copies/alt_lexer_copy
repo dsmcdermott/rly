@@ -1,6 +1,7 @@
 //compile_error!("This is just a template file and shouldn't be compiled");
 
 #[allow(nonstandard_style, dead_code)]
+#[allow(clippy::all)]
 mod lexer {
 	use lex::{
 		regex::{
