@@ -1,5 +1,5 @@
 // This test is to make sure that the code in `parse/parse-tests/examples/calculator.rs`
-// matches to code shown in the example in `parse/src/parser_doc.md` with appears in the
+// matches the code shown in the example in `parse/src/parser_doc.md` which appears in the
 // documentation for `parse`.
 
 use diff::Result::{self, *};

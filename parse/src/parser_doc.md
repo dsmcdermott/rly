@@ -637,7 +637,9 @@ struct Calculator {
 
 impl Calculator {
 	fn new() -> Self {
-		Self { stack: vec![Vec::new()] }
+		Self {
+			stack: vec![Vec::new()],
+		}
 	}
 
 	// pushes 'n' onto the end of the Vec on top of self.stack
