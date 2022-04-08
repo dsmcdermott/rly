@@ -1,7 +1,10 @@
-
 use diff::Result as DR;
 
-use std::{error::Error, fs::{self, File}, path::Path};
+use std::{
+	error::Error,
+	fs::{self, File},
+	path::Path,
+};
 
 fn gen_lexer<S: AsRef<Path>>(s: S) -> Result<String, Box<dyn Error>> {
 	let fin = File::open(s)?;
@@ -24,14 +27,18 @@ fn test_changes<S: AsRef<Path>, T: AsRef<Path>>(src: S, reference: T) {
 		})
 		.collect();
 	if !diff.is_empty() {
-		eprintln!("{}\t{}", &reference.to_string_lossy(), &src.to_string_lossy());
+		eprintln!(
+			"{}\t{}",
+			&reference.to_string_lossy(),
+			&src.to_string_lossy()
+		);
 		for res in diff {
 			match res {
 				DR::Left(s) => eprintln!("-{}", s),
 				DR::Right(s) => eprintln!("+{}", s),
 				_ => unreachable!(),
 			};
-		};
+		}
 		panic!();
 	};
 }

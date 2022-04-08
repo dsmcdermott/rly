@@ -28,7 +28,7 @@ macro_rules! test_proper {
 		fn $name() {
 			display_err(parse($sent)).unwrap();
 		}
-	}
+	};
 }
 
 test_proper!(test_sent, "the cat sees the mouse");
@@ -36,7 +36,6 @@ test_proper!(test_sent, "the cat sees the mouse");
 test_proper!(test_intr, "the small mouse sleeps");
 
 test_proper!(test_adj, "the black cat chases the quick mouse");
-
 
 fn unwrap_syntax_err<'a>(result: Result<Ast<'a>, Error>) -> SyntaxError {
 	match result {
@@ -46,7 +45,7 @@ fn unwrap_syntax_err<'a>(result: Result<Ast<'a>, Error>) -> SyntaxError {
 				eprintln!("{}", e);
 				panic!("{:?}", e);
 			}
-		}
+		},
 		Ok(a) => {
 			eprintln!("{}", a.display());
 			panic!("error not generated");
@@ -61,7 +60,7 @@ macro_rules! test_eof {
 			let err = unwrap_syntax_err(parse($sent));
 			assert_eq!(err.kind(), &SyntaxErrorKind::UnexpectedEof);
 		}
-	}
+	};
 }
 
 macro_rules! test_ut {
@@ -69,9 +68,12 @@ macro_rules! test_ut {
 		#[test]
 		fn $name() {
 			let err = unwrap_syntax_err(parse($sent));
-			assert_eq!(err.kind(), &SyntaxErrorKind::UnexpectedToken($tok.to_string()));
+			assert_eq!(
+				err.kind(),
+				&SyntaxErrorKind::UnexpectedToken($tok.to_string())
+			);
 		}
-	}
+	};
 }
 
 test_eof!(test_trans_eof, "the big cat catches");

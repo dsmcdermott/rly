@@ -1,4 +1,3 @@
-
 // in src/main.rs
 
 use std::io;
@@ -67,7 +66,9 @@ struct Calculator {
 
 impl Calculator {
 	fn new() -> Self {
-		Self { stack: vec![Vec::new()] }
+		Self {
+			stack: vec![Vec::new()],
+		}
 	}
 
 	// pushes 'n' onto the end of the Vec on top of self.stack
@@ -125,7 +126,6 @@ impl<'a, 's> Walker<'a, NonTerm, Token<'s>, ()> for Calculator {
 	}
 }
 
-
 #[cfg(test)]
 mod tests {
 
@@ -134,7 +134,7 @@ mod tests {
 
 	#[test]
 	fn test() {
-		use super::{Lexer, Calculator};
+		use super::{Calculator, Lexer};
 		let lexer = Lexer::new();
 		let mut calc = Calculator::new();
 		let tokens = lexer.lex(INP);

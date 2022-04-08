@@ -1,5 +1,5 @@
-use std::error::Error;
 use lex::LexerBuilder;
+use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let mut builder = LexerBuilder::new().unwrap();

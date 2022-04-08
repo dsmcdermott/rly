@@ -254,7 +254,7 @@ pub mod tests {
 		for (k, mut v) in rules.rules.into_iter() {
 			v.sort_unstable();
 			rule_data.push((k, v));
-		};
+		}
 		rule_data.sort_unstable();
 		macro_rules! rule_structure {
 			($lhs: expr, $([$first: expr, $($rhs: expr),*]),+) => {
@@ -284,7 +284,7 @@ pub mod tests {
 			let mut firsts: Vec<_> = set.into_iter().collect();
 			firsts.sort_unstable();
 			firsts_map.push((n, firsts));
-		};
+		}
 		firsts_map.sort_unstable();
 		let mut reference_firsts = Vec::new();
 		let init: [(_, &[_]); 3] = [
@@ -296,7 +296,7 @@ pub mod tests {
 			let mut firsts = v.to_vec();
 			firsts.sort_unstable();
 			reference_firsts.push((k, firsts));
-		};
+		}
 		reference_firsts.sort_unstable();
 		assert_eq!(firsts_map, reference_firsts);
 	}

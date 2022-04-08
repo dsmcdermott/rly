@@ -2,18 +2,14 @@
 // matches to code shown in the example in `parse/src/parser_doc.md` with appears in the
 // documentation for `parse`.
 
-use std::{
-	fmt::Display,
-	fs,
-};
 use diff::Result::{self, *};
+use std::{fmt::Display, fs};
 
 fn prep_lines<'s, I>(inp: I) -> impl Iterator<Item = &'s str>
 where
-	I: Iterator<Item = &'s str>
+	I: Iterator<Item = &'s str>,
 {
-	inp
-		.map(str::trim)
+	inp.map(str::trim)
 		.filter(|s| !s.is_empty())
 		.filter(|s| !s.starts_with("//"))
 		// Do not take the tests in `calculator.rs` into account when computing the diff.
@@ -41,7 +37,8 @@ fn find_final_example(s: &str) -> impl Iterator<Item = &str> {
 // If the diff contains any changes, the function prints the changes to the standard err
 // and then panics.
 fn handle_diff<T: Display>(diff: Vec<Result<T>>) {
-	let results: Vec<_> = diff.into_iter()
+	let results: Vec<_> = diff
+		.into_iter()
 		.filter(|res| match res {
 			Left(_) => true,
 			Right(_) => true,
@@ -55,7 +52,7 @@ fn handle_diff<T: Display>(diff: Vec<Result<T>>) {
 				Right(s) => eprintln!("+ {}", s),
 				_ => unreachable!(),
 			}
-		};
+		}
 		panic!("the two examples differ");
 	};
 }

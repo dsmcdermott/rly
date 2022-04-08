@@ -39,8 +39,13 @@ should be doable.
 
 ## Clippy
 
-- [ ] Learn how clippy works and see if there's anything I need to do to make the
+- [x] Learn how clippy works and see if there's anything I need to do to make the
 generated modules play nice with it.
+
+Partially done; blanket `allow` attributes were added for the clippy lints. The next step
+is to change the filters to be more fine-grained so that clippy can still provide usefull
+lints when using a generated module in an external project. This is added as an item
+below.
 
 # Less Important Changes
 
@@ -102,6 +107,11 @@ templates.
 error checking on the non-terminal symbols.
 
 - [ ] Allow you to use string literals in parser specifications.
+
+## Clippy
+
+- [ ] Change the `allow` attributes on the generated modules to allow clippy lints which
+do not provide false positives.
 
 ### Unicode
 

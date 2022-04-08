@@ -1,4 +1,3 @@
-
 lex::lexer!();
 
 mod lex_alt {
@@ -23,28 +22,30 @@ where
 	for token in lexer {
 		let tok = token.unwrap();
 		tokens.push((*tok.kind(), tok.val()));
-	};
+	}
 	assert_eq!(&tokens, res);
 }
 
 #[test]
 fn test_lexing_main() {
-	use lexer::{Lexer, TokenKind::{self, *}};
-	let kind_val = [
-		(id, "A"),
-		(mul, "*"),
-		(int, "2"),
-		(sum, "+"),
-		(int, "1"),
-	];
+	use lexer::{
+		Lexer,
+		TokenKind::{self, *},
+	};
+	let kind_val = [(id, "A"), (mul, "*"), (int, "2"), (sum, "+"), (int, "1")];
 	test_lexing::<TokenKind, Lexer>(LEX_INP, &kind_val);
 }
 
-fn test_err<T, L>(inp: &str, first_kind: T, first_val: &str, err_kind: lex::ErrorKind, err_val: &str)
-where
+fn test_err<T, L>(
+	inp: &str,
+	first_kind: T,
+	first_val: &str,
+	err_kind: lex::ErrorKind,
+	err_val: &str,
+) where
 	T: Eq + std::fmt::Debug,
 	L: lex::Lexer<T>,
-	for <'r, 's> &'r L: lex::IntoTokens<'s, T>,
+	for<'r, 's> &'r L: lex::IntoTokens<'s, T>,
 {
 	use lex::IntoTokens;
 	let rules = L::new();
@@ -60,14 +61,20 @@ where
 #[test]
 fn test_lexing_invalid() {
 	use lex::ErrorKind;
-	use lexer::{TokenKind, Lexer};
-	test_err::<TokenKind, Lexer>(LEX_INVALID, TokenKind::id, "A", ErrorKind::UnrecognisedInput, "-");
+	use lexer::{Lexer, TokenKind};
+	test_err::<TokenKind, Lexer>(
+		LEX_INVALID,
+		TokenKind::id,
+		"A",
+		ErrorKind::UnrecognisedInput,
+		"-",
+	);
 }
 
 #[test]
 fn test_lexing_err() {
 	use lex::ErrorKind;
-	use lexer::{TokenKind, Lexer};
+	use lexer::{Lexer, TokenKind};
 	test_err::<TokenKind, Lexer>(LEX_ERR_RULE, TokenKind::id, "A", ErrorKind::ErrorRule, "\\");
 }
 
@@ -77,7 +84,10 @@ const LEX_ALT_ERR: &'static str = "5 five 5";
 
 #[test]
 fn test_lexing_alt() {
-	use lex_alt::{Lexer, TokenKind::{self, *}};
+	use lex_alt::{
+		Lexer,
+		TokenKind::{self, *},
+	};
 	let kind_val = [
 		(HEX, "0xa"),
 		(PLUS, "+"),
@@ -93,13 +103,25 @@ fn test_lexing_alt() {
 #[test]
 fn test_lexing_alt_invalid() {
 	use lex::ErrorKind;
-	use lex_alt::{TokenKind, Lexer};
-	test_err::<TokenKind, Lexer>(LEX_ALT_INVALID, TokenKind::IDENT, "A", ErrorKind::UnrecognisedInput, "*");
+	use lex_alt::{Lexer, TokenKind};
+	test_err::<TokenKind, Lexer>(
+		LEX_ALT_INVALID,
+		TokenKind::IDENT,
+		"A",
+		ErrorKind::UnrecognisedInput,
+		"*",
+	);
 }
 
 #[test]
 fn test_lexing_alt_err() {
 	use lex::ErrorKind;
-	use lex_alt::{TokenKind, Lexer};
-	test_err::<TokenKind, Lexer>(LEX_ALT_ERR, TokenKind::DEC, "5", ErrorKind::ErrorRule, "five");
+	use lex_alt::{Lexer, TokenKind};
+	test_err::<TokenKind, Lexer>(
+		LEX_ALT_ERR,
+		TokenKind::DEC,
+		"5",
+		ErrorKind::ErrorRule,
+		"five",
+	);
 }

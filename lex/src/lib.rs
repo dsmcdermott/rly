@@ -185,9 +185,14 @@ name : "#.*""##;
 				previous_lineno: lineno,
 				previous_line: line,
 			} => {
-				assert_eq!((name.as_str(), *lineno, line.as_str()), ("name", 1, r#"name : "[a-zA-Z_][0-9a-zA-Z_]*""#));
+				assert_eq!(
+					(name.as_str(), *lineno, line.as_str()),
+					("name", 1, r#"name : "[a-zA-Z_][0-9a-zA-Z_]*""#)
+				);
 			}
-			_ => { panic!("{:?}", err.kind()); }
+			_ => {
+				panic!("{:?}", err.kind());
+			}
 		};
 	}
 
@@ -207,13 +212,15 @@ comment : "#.*"
 		assert_eq!(err.lineno(), 1);
 		assert_eq!(err.line(), r#"name : "a?|[a-zA-Z_][0-9a-zA-Z_]*""#);
 		match err.kind() {
-			LexerErrorKind::EmptyRegexMatch {
-				name,
-				regex,
-			} => {
-				assert_eq!((name.as_str(), regex.as_str()), ("name", r#"a?|[a-zA-Z_][0-9a-zA-Z_]*"#));
+			LexerErrorKind::EmptyRegexMatch { name, regex } => {
+				assert_eq!(
+					(name.as_str(), regex.as_str()),
+					("name", r#"a?|[a-zA-Z_][0-9a-zA-Z_]*"#)
+				);
 			}
-			_ => { panic!("{:?}", err.kind()); }
+			_ => {
+				panic!("{:?}", err.kind());
+			}
 		};
 	}
 }

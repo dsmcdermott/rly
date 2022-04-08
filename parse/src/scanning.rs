@@ -420,16 +420,22 @@ Fact ->
 
 	#[test]
 	fn test_scan() {
-		use std::collections::HashMap;
 		use super::Scanner;
+		use std::collections::HashMap;
 		let mut rules = assert(Scanner::scan_text(TEST_DOC));
 		for (_k, v) in rules.iter_mut() {
 			v.sort_unstable();
-		};
+		}
 		let ref_rules = HashMap::from_iter([
 			rule!("Start", ["Expr"]),
 			rule!("Expr", ["Fact"]),
-			rule!("Fact", ["lparen", "Expr", "rparen"], ["n"], ["plus", "Fact"], ["Fact", "plus", "n"]),
+			rule!(
+				"Fact",
+				["lparen", "Expr", "rparen"],
+				["n"],
+				["plus", "Fact"],
+				["Fact", "plus", "n"]
+			),
 		]);
 		assert_eq!(rules, ref_rules);
 	}
@@ -462,7 +468,7 @@ Fact ->
 				let correct_data = ErrorData::new("lparen Expr rparen".to_string(), 5, 7, 41);
 				assert_eq!(data, correct_data);
 			}
-			_ => unreachable!()
+			_ => unreachable!(),
 		}
 	}
 }
